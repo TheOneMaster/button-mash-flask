@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from uuid import uuid4
 from datetime import date, datetime
 
-from . import app
+from app import app
 
 db = SQLAlchemy(app)
 
