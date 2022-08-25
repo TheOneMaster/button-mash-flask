@@ -1,0 +1,14 @@
+{% extends "template.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+
+{% if current_user.is_authenticated %}
+    <h1>Hi {{ current_user.username }}</h1>
+{% else %}
+    <h1>Hello world</h1>
+{% endif %}
+
+{% endblock %}

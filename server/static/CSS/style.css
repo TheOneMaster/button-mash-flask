@@ -1,0 +1,96 @@
+:root{
+    --theme-color: darkcyan;
+}
+
+body {
+    margin: 0;
+    font-family: "Roboto";
+}
+
+ /* Top Bar */
+.topbar {
+    display: flex;
+    background-color: var(--theme-color);
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 20px;
+    padding-right: 20px;
+    align-items: center;
+    color: white;
+}
+
+.profilePicture {
+    height: 100px
+}
+
+.profilePicture img {
+    max-height: 100%;
+    max-width: 100%;
+    cursor: pointer;
+}
+
+#topProfile {
+    margin-left: auto;
+}
+
+/* Container and template classes */
+.container {
+    margin: 20px;
+}
+
+
+.signupblock {
+    margin-top: 100px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.signupbox {
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    min-width: 300px;
+}
+
+.input {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn {
+    margin: 10px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 8px;
+
+    color: white;
+    font-size:18px;
+    font-weight: bold;
+    background-color: var(--theme-color)
+}
+
+.notification {
+    padding: 30px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+
+    font-weight: bold;
+    background-color: lightgray;
+    color: white;    
+}
+
+.is-danger {
+    background-color: hsl(348, 100%, 61%);
+}
+
+.submit-btn {
+    margin: 0px;
+    margin-top: 20px;
+    padding: 10px;
+    width: 100%;
+}

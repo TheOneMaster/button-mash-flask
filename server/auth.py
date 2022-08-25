@@ -1,0 +1,74 @@
+from flask import Blueprint, render_template, redirect, request, url_for, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user
+
+
+from . import db
+from .database import User
+from .helper import no_login
+
+auth = Blueprint("auth", __name__)
+
+
+@auth.route("/signup")
+@no_login("main.home")
+def signup():
+    return render_template("signup.html")
+
+@auth.route("/signup", methods=['POST'])
+def signup_post():
+    
+    form = request.form
+    email = form.get('email')
+    
+    if not email:
+        flash("Enter a valid email address")
+        return redirect(url_for("auth.signup"))
+    
+    user = User.query.filter_by(email=form['email']).first()
+    
+    if user:
+        flash(f"Email address already in use. Login to your account at <a href={url_for('auth.login')}>login page</a>")
+        return redirect(url_for('auth.signup'))
+    
+    if form['password'] != form['passwordRepeat']:
+        flash("Passwords do not match")
+        return redirect(url_for('auth.signup'))
+    
+    password = generate_password_hash(form['password'], method="sha256")
+        
+    newUser = User(email=form['email'], username=form['username'], password=password)
+    
+    db.session.add(newUser)
+    db.session.commit()
+    
+    return redirect(url_for('auth.login'))
+
+@auth.route("/login")
+@no_login("main.home")
+def login():
+    return render_template('login.html')
+
+@auth.route("/login", methods=['POST'])
+def login_post():
+    
+    email = request.form.get('email')
+    password = request.form.get('password')    
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if user and check_password_hash(user.password, password):
+        login_user(user, remember=True)
+        return redirect('/')
+    elif not user:
+        string = f"Email address not in use. Make an account at <a href={url_for('auth.signup')}>signup page</a>"
+        flash(string)
+        return redirect(url_for('auth.login'))
+    else:
+        flash("Please check your user account details and try again")
+        return redirect(location)
+
+    
+    return redirect(url_for('auth.login'))
+
+

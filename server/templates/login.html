@@ -1,0 +1,30 @@
+{% extends "template.html" %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+<div class="signupblock">
+    <div class="signupbox">
+        <div>
+            <h2>Login</h2>
+        </div>
+        <div>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="notification is-danger">
+                    {{ messages[0] | safe}}.
+                </div>
+            {% endif %}
+            {% endwith %}
+            <form action="/login" method="post">
+                <input type="text" class="input" name="email" placeholder="Email address" maxlength="100" required>
+                <input type="password" class="password-input input" name="password" placeholder="Password" maxlength="100" required>
+                <button type="submit" class="submit-btn btn">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
