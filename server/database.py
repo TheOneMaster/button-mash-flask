@@ -1,8 +1,11 @@
 from uuid import uuid4
 from datetime import date, datetime
+from flask import url_for
 from flask_login import UserMixin
+from flask_sqlalchemy import SQLAlchemy
 
-from . import db
+
+db = SQLAlchemy()
 
 userGames = db.Table('userGames',
                      db.Column('user_id', db.String, db.ForeignKey('user.id'), primary_key=True),
@@ -10,15 +13,23 @@ userGames = db.Table('userGames',
                      )
 
 def generate_uuid():
-    return str(uuid4())
+    return uuid4().hex
+
+def default_picture():
+    return url_for('static', filename="Images/profile.png")
 
 
 
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    username = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(50), nullable=False)
+    """
+    Model for the User Table in the database
+    """
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    email = db.Column(db.String, unique=True, nullable=False)
+    username = db.Column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False)
+    country = db.Column(db.String, nullable=True)
+    picture = db.Column(db.String, nullable=False, default=default_picture)
     dateCreated = db.Column(db.Date, default=date.today)
     
 
@@ -27,9 +38,12 @@ class User(db.Model, UserMixin):
                                         lazy=True)
     
 class Game(db.Model):
+    """
+    Model for the Game table in the database
+    """
     id = db.Column(db.Integer, primary_key=True)
-    winner = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    runnerUp = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    winner = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
+    runnerUp = db.Column(db.String, db.ForeignKey('user.id'), nullable=True)
     dateTime = db.Column(db.DateTime, default=datetime.utcnow)
 
     

@@ -6,10 +6,9 @@ from flask_login import LoginManager
 
 # Might have to move this into the function later
 # from .game import socket
+from .database import db, User
 
 load_dotenv()
-
-db = SQLAlchemy()
 
 def create_app():
     
@@ -18,29 +17,26 @@ def create_app():
     app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
+    app.jinja_env.trim_blocks = True
+    app.jinja_env.lstrip_blocks = True
+    
     db.init_app(app)
     # socket.init_app(app)
     
-    login_manager = LoginManager()
-    login_manager.init_app(app)
+    login_manager = LoginManager(app=app)
     login_manager.login_view = 'auth.login'
-    
-    from .database import User
     
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return User.query.get(user_id)
     
     # Add blueprints to the app
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
     
-    
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint)
 
-    
-    
     return app
 
 
