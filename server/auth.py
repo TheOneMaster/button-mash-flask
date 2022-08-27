@@ -59,9 +59,10 @@ def login_post():
     password = request.form.get('password')    
     
     user = User.query.filter_by(email=email).first()
+    remember = bool(request.form.get('remember'))
     
     if user and check_password_hash(user.password, password):
-        login_user(user, remember=True)
+        login_user(user, remember=remember)
         return redirect('/')
     elif not user:
         string = f"Email address not in use. Make an account at <a href={url_for('auth.signup')}>signup page</a>"

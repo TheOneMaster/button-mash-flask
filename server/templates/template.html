@@ -16,11 +16,7 @@
         <div class="profile">
             {% if current_user.is_authenticated %}
                 
-                {% if current_user.picture %}
-                    <img src="{{ url_for() }}">
-                {% else %}
-                    <img src="{{ url_for('static', filename='Images/profile.png') }}">
-                {% endif %}
+                <img src="{{ current_user.picture }}">
 
             {% else %}
 
