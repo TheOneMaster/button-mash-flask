@@ -13,7 +13,7 @@ auth = Blueprint("auth", __name__)
 @auth.route("/signup")
 @no_login
 def signup():
-    return render_template("signup.html")
+    return render_template("signup.jinja")
 
 @auth.route("/signup", methods=['POST'])
 def signup_post():
@@ -50,7 +50,7 @@ def signup_post():
 @auth.route("/login")
 @no_login
 def login():
-    return render_template('login.html')
+    return render_template('login.jinja')
 
 @auth.route("/login", methods=['POST'])
 def login_post():
