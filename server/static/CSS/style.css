@@ -1,10 +1,12 @@
 :root{
     --theme-color: darkcyan;
+    --title-font: "Rubik", sans-serif;
+    --content-font: "Roboto", sans-serif;
 }
 
 body {
     margin: 0;
-    font-family: "Roboto";
+    font-family: var(--content-font);
 }
 
  /* Top Bar */
@@ -17,6 +19,13 @@ body {
     padding-right: 20px;
     align-items: center;
     color: white;
+
+    font-family: var(--title-font);
+}
+
+.main-logo {
+    color: white;
+    text-decoration: none;
 }
 
 .profile {

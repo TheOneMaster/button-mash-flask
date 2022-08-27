@@ -3,16 +3,18 @@
     <title></title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}">
 
-    <!-- Roboto Font -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik&display=swap" rel="stylesheet">
     {% block head %}{% endblock %}
 </head>
 <body>
     <div class="topbar">
 
-        <h1>Button Mash</h1>
+        <a href="{{ url_for('main.home') }}" class="main-logo">
+            <h1>Button Mash</h1>
+        </a>
         
         <div class="profile">
             {% if current_user.is_authenticated %}
