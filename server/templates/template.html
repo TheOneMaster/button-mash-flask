@@ -12,11 +12,31 @@
 <body>
     <div class="topbar">
         <h1>Button Mash</h1>
-        <div id="topProfile" class="profilePicture">
-            <img src="{{ url_for('static', filename='Images/profile.png') }}">
+        
+        <div class="profile">
+            {% if current_user.is_authenticated %}
+                
+                {% if current_user.picture %}
+                    <img src="{{ url_for() }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='Images/profile.png') }}">
+                {% endif %}
+
+            {% else %}
+
+                <div class="auth-btns">
+                    <div class="login-btn">
+                        <a href="{{ url_for('auth.login') }}">Login</a>
+                    </div>
+                    <div class="signup-btn">
+                        <a href="{{ url_for('auth.signup') }}">Signup</a>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
+
     <div class="container">
-        {% block body %}{% endblock %}
+        {%- block body %}{%- endblock %}
     </div>
 </body>

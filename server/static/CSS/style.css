@@ -19,11 +19,15 @@ body {
     color: white;
 }
 
-.profilePicture {
-    height: 100px
+.profile {
+    height: 100px;
+    margin-left: auto;
+
+    display: flex;
+    align-items: center;
 }
 
-.profilePicture img {
+.profile img {
     max-height: 100%;
     max-width: 100%;
     cursor: pointer;
@@ -31,6 +35,19 @@ body {
 
 #topProfile {
     margin-left: auto;
+}
+
+.auth-btns {
+    display: flex;
+    flex-direction: row;
+    column-gap: 15px;
+}
+
+.auth-btns a {
+    color: inherit;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.5em;
 }
 
 /* Container and template classes */
@@ -93,4 +110,8 @@ body {
     margin-top: 20px;
     padding: 10px;
     width: 100%;
+}
+
+.div-checkbox {
+    margin-top: 15px;
 }
