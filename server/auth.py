@@ -1,17 +1,17 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
+from urllib.request import urlopen
+import json
 
-
-from . import db
-from .database import User
+from .database import db, User
 from .helper import no_login
 
 auth = Blueprint("auth", __name__)
 
 
 @auth.route("/signup")
-@no_login("main.home")
+@no_login
 def signup():
     return render_template("signup.html")
 
@@ -36,8 +36,11 @@ def signup_post():
         return redirect(url_for('auth.signup'))
     
     password = generate_password_hash(form['password'], method="sha256")
+    # ip = request.remote_addr
+    # response = urlopen(f"https://ipinfo.io/{ip}/json")
+    # data = json.load(response)
         
-    newUser = User(email=form['email'], username=form['username'], password=password)
+    newUser = User(email=form['email'], username=form['username'], password=password, country='test')
     
     db.session.add(newUser)
     db.session.commit()
@@ -45,7 +48,7 @@ def signup_post():
     return redirect(url_for('auth.login'))
 
 @auth.route("/login")
-@no_login("main.home")
+@no_login
 def login():
     return render_template('login.html')
 
