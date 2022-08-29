@@ -7,6 +7,10 @@
 body {
     margin: 0;
     font-family: var(--content-font);
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
 }
 
  /* Top Bar */
@@ -59,9 +63,33 @@ body {
     font-size: 1.5em;
 }
 
+footer {
+    margin-top: auto;
+    background-color: green;
+    color: white;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    align-items: center;
+    font-family: var(--title-font);
+}
+
+footer p{
+    margin: 0;
+    padding: 0;
+}
+
+.footer-pain {
+    height: 15px;
+    display: inline-block;
+}
+
 /* Container and template classes */
 .container {
     margin: 20px;
+    flex-grow: 1;
 }
 
 
@@ -123,4 +151,29 @@ body {
 
 .div-checkbox {
     margin-top: 15px;
+}
+
+/* Game CSS */
+.game-container {
+    display: flex;
+    height: 100%;
+}
+
+.game-settings {
+    margin-left: auto;
+    display: flex;
+
+    border-radius: 15px;
+    width: 20vw;
+    justify-content: center;
+
+    border: 1px black solid;
+}
+
+.room-settings {
+    margin-top: auto;
+    padding-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

@@ -1,12 +1,14 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, redirect
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 
-# Might have to move this into the function later
-# from .game import socket
-from .database import db, User
+from flask import Flask
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+
+from datetime import date
+
+from .database import User, db
+from .game import socket
 
 load_dotenv()
 
@@ -20,8 +22,10 @@ def create_app():
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
     
+    app.jinja_env.globals['date'] = date.today()
+    
     db.init_app(app)
-    # socket.init_app(app)
+    socket.init_app(app)
     
     login_manager = LoginManager(app=app)
     login_manager.login_view = 'auth.login'
@@ -42,5 +46,7 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    # socket.run(app, debug=True)
-    app.run(debug=True)
+    
+    
+    socket.run(app, debug=True)
+    # app.run(debug=True)
