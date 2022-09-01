@@ -1,4 +1,4 @@
-:root{
+:root {
     --theme-color: darkcyan;
     --title-font: "Rubik", sans-serif;
     --content-font: "Roboto", sans-serif;
@@ -13,9 +13,21 @@ body {
     flex-direction: column;
 }
 
- /* Top Bar */
-.topbar {
+
+/* Helper classes */
+.flex-col {
     display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+
+/* Top Bar */
+.topbar {
     background-color: var(--theme-color);
     width: 100%;
     box-sizing: border-box;
@@ -23,20 +35,27 @@ body {
     padding-right: 20px;
     align-items: center;
     color: white;
-
     font-family: var(--title-font);
 }
 
-.main-logo {
+.link-top {
     color: white;
     text-decoration: none;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1.5em;
+    margin-left: 10px;
+}
+
+.link-main {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0;
 }
 
 .profile {
     height: 100px;
     margin-left: auto;
-
-    display: flex;
     align-items: center;
 }
 
@@ -50,33 +69,18 @@ body {
     margin-left: auto;
 }
 
-.auth-btns {
-    display: flex;
-    flex-direction: row;
-    column-gap: 15px;
-}
-
-.auth-btns a {
-    color: inherit;
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 1.5em;
-}
-
 footer {
     margin-top: auto;
     background-color: green;
     color: white;
     padding-top: 10px;
     padding-bottom: 10px;
-    display: flex;
-    flex-direction: column;
     row-gap: 10px;
     align-items: center;
     font-family: var(--title-font);
 }
 
-footer p{
+footer p {
     margin: 0;
     padding: 0;
 }
@@ -90,6 +94,7 @@ footer p{
 .container {
     margin: 20px;
     flex-grow: 1;
+    overflow: hidden;
 }
 
 
@@ -108,10 +113,13 @@ footer p{
 }
 
 .input {
-    margin-bottom: 10px;
     padding: 10px;
-    width: 100%;
     box-sizing: border-box;
+}
+
+.form-input {
+    width: 100%;
+    margin-bottom: 10px;
 }
 
 .btn {
@@ -119,9 +127,8 @@ footer p{
     padding: 10px 30px;
     border: none;
     border-radius: 8px;
-
     color: white;
-    font-size:18px;
+    font-size: 18px;
     font-weight: bold;
     background-color: var(--theme-color)
 }
@@ -132,10 +139,9 @@ footer p{
     width: 100%;
     box-sizing: border-box;
     border-radius: 10px;
-
     font-weight: bold;
     background-color: lightgray;
-    color: white;    
+    color: white;
 }
 
 .is-danger {
@@ -155,25 +161,69 @@ footer p{
 
 /* Game CSS */
 .game-container {
-    display: flex;
     height: 100%;
 }
 
-.game-settings {
-    margin-left: auto;
-    display: flex;
-
-    border-radius: 15px;
-    width: 20vw;
-    justify-content: center;
-
+.game-main {
+    flex-grow: 1;
+    margin-left: 20px;
+    margin-right: 20px;
     border: 1px black solid;
+    border-radius: 15px;
+    position: relative;
+    transition: 1s;
+}
+
+#settingsGear {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 40px;
+}
+
+
+.game-settings {
+    max-width: 300px;
+    min-width: 200px;
+    border-radius: 15px;
+    justify-content: center;
+    border: 1px black solid;
+    padding: 20px;
+    visibility: visible;
+    white-space: nowrap;
+    transition: all 1s;
+}
+
+.settings-div {
+    align-items: center;
+}
+
+.settings-str {
+    margin-top: 0px;
+}
+
+.settings-input {
+    font-size: 1rem;
+    width: auto;
 }
 
 .room-settings {
     margin-top: auto;
     padding-bottom: 50px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+}
+
+#roomId-str {
+    margin-top: 0px;
+}
+
+.hidden {
+    max-width: 0px;
+    min-width: 0px;
+    visibility: hidden;
+    opacity: 0;
+    width: 0px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    overflow: hidden;
 }

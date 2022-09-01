@@ -10,26 +10,16 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    <div class="topbar">
-
-        <a href="{{ url_for('main.home') }}" class="main-logo">
-            <h1>Button Mash</h1>
-        </a>
-        
-        <div class="profile">
+    <div class="topbar flex-row">
+        <a href="{{ url_for('main.home') }}" class="link-main link-top link">Button Mash</a>
+        <a href="{{ url_for('main.game') }}" class="link-top link">Game</a>
+        <div class="profile flex-row">
             {% if current_user.is_authenticated %}
-                
                 <img src="{{ current_user.picture }}">
-
             {% else %}
-
-                <div class="auth-btns">
-                    <div class="login-btn">
-                        <a href="{{ url_for('auth.login') }}">Login</a>
-                    </div>
-                    <div class="signup-btn">
-                        <a href="{{ url_for('auth.signup') }}">Signup</a>
-                    </div>
+                <div class="auth-btns flex-row">
+                    <a class="link-top link" href="{{ url_for('auth.login') }}">Login</a>
+                    <a class="link-top link" href="{{ url_for('auth.signup') }}">Signup</a>    
                 </div>
             {% endif %}
         </div>
@@ -38,8 +28,10 @@
     <div class="container">
         {%- block body %}{%- endblock %}
     </div>
-    <footer>
+    <footer class="flex-col">
         <p>Made with <img class="footer-pain" src="{{ url_for('static', filename='Images/pain.png') }}"/> by Nayan</p>
         <p>© {{ date.year }} </p>
     </footer>
+    {% block modal %}
+    {% endblock %}
 </body>
