@@ -41,7 +41,7 @@ class Game(db.Model):
     """
     Model for the Game table in the database
     """
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True)
     winner = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
     runnerUp = db.Column(db.String, db.ForeignKey('user.id'), nullable=True)
     dateTime = db.Column(db.DateTime, default=datetime.utcnow)
