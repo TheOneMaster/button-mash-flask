@@ -79,6 +79,45 @@ socket.on('client-settings', (json) => {
     console.log('Updated settings')
 })
 
+socket.on('lobby-update', (rooms) => {
+    console.log(rooms)
+
+    let table = document.getElementById('lobbyTable');
+
+    let rowList = []
+
+    for (let room in rooms) {
+        let row = document.createElement('tr');
+        
+        let td_num = document.createElement('td');
+        td_num.classList.add('lobby-row', 'row');
+        td_num.textContent = room;
+
+        let td_state = document.createElement('td');
+        let circle = document.createElement('div');
+
+        circle.classList.add('circle');
+
+        if (rooms[room] <= 3){
+            circle.classList.add('open-lobby');
+        } else {
+            circle.classList.add('closed-lobby');
+        }
+
+        td_state.append(circle);
+
+        row.append(td_num, td_state);
+
+        rowList.push(row);        
+    }
+
+    table.replaceChildren(...rowList);
+
+})
+
+
+// Game events
+
 socket.on('start-game', () => {
     console.log('Starting game');
     game.initGame()
@@ -95,13 +134,13 @@ socket.on('game-score', (score) => {
 
 const game = {
 
-    maxTime: 30,
+    maxTime: 10,
     totalPress: 0,
     score: 0,
 
 
     start_time: undefined,
-    end_time: undefined,
+    current_time: undefined,
 
     mash_key: ' ',
 
@@ -114,7 +153,7 @@ const game = {
         game.score = 0
 
         game.start_time = undefined;
-        game.end_time = undefined;
+        game.current_time = undefined;
 
         game.tick = 0
     },
@@ -153,7 +192,7 @@ const game = {
 
     gameEnd: function (loop) {
         clearInterval(loop);
-        socket.emit('game-end', game.score)
+        socket.emit('game-end')
         game.resetGame()
     }
 
