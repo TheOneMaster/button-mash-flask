@@ -67,12 +67,8 @@ def login_post():
     elif not user:
         string = f"Email address not in use. Make an account at <a href={url_for('auth.signup')}>signup page</a>"
         flash(string)
-        return redirect(url_for('auth.login'))
     else:
         flash("Please check your user account details and try again")
-        return redirect(location)
 
     
     return redirect(url_for('auth.login'))
-
-
