@@ -5,6 +5,23 @@ const eventHandlers = {
     let settings = document.getElementById("gameSettings");
     settings.classList.toggle("hidden");
   },
+
+  activeLobby: function () {
+    let lobby = document.getElementById('lobbyGrid');
+    let rooms = lobby.childNodes;
+
+    let active = 'active-lobby'
+
+    for (let room of rooms) {
+      
+      let class_check = room.classList.contains(active);
+
+      if (class_check) room.classList.remove(active);
+    }
+
+    this.classList.add(active)
+  },
+
 };
 
 function addEventHandlers() {
@@ -18,7 +35,6 @@ function addEventHandlers() {
 const socket = io();
 
 function changeRoom() {
-  let btn = document.getElementById("changeRoomBtn");
   let room_entry = document.getElementById("roomId");
   let curRoom = document.getElementById("roomId-str");
 
@@ -77,21 +93,20 @@ socket.on("client-settings", (json) => {
 
 socket.on("lobby-update", (rooms) => {
 
-  let table = document.getElementById("lobbyTable");
+  console.log(rooms)
 
-  let rowList = [];
+  let test = document.getElementById('testTemplate').content.firstElementChild;
+  let grid = document.getElementById('lobbyGrid');
 
+  // Create list of lobbies from json file
+  let rows = []
   for (let room in rooms) {
-    let row = document.createElement("tr");
+    let clone = test.cloneNode(true);
+    let button = clone.querySelector("h4");
+    let circle = clone.querySelector(".circle");
 
-    let td_num = document.createElement("td");
-    td_num.classList.add("lobby-row", "row");
-    td_num.textContent = room;
-
-    let td_state = document.createElement("td");
-    let circle = document.createElement("div");
-
-    circle.classList.add("circle");
+    clone.dataset.num = room;
+    button.textContent = room;
 
     if (rooms[room] <= 3) {
       circle.classList.add("open-lobby");
@@ -99,14 +114,17 @@ socket.on("lobby-update", (rooms) => {
       circle.classList.add("closed-lobby");
     }
 
-    td_state.append(circle);
+    clone.addEventListener('click', eventHandlers.activeLobby)
 
-    row.append(td_num, td_state);
+    rows.push(clone);
 
-    rowList.push(row);
   }
 
-  table.replaceChildren(...rowList);
+  grid.replaceChildren(...rows);
+
+
+
+  return
 });
 
 // Game events
