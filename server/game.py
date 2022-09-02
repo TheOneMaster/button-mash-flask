@@ -62,10 +62,7 @@ def remove_room():
         ROOM_CLIENT_MAP.pop(r_room)
     
     return r_room
-    
-        
-    
-
+     
 def getRoom():
     
     room = None
@@ -93,6 +90,7 @@ def update_lobby(fn):
         
         if room and username:
     
+            # Send user settings to user
             msg_client = {
                 'username': username,
                 'room': room
@@ -100,14 +98,22 @@ def update_lobby(fn):
             
             emit('client-settings', msg_client)
             
-            
-            lobby = ROOM_CLIENT_MAP[room]
-            lobbyClients = {client: CLIENT_USERNAME[client] for client in lobby.keys()}
-            msg_lobby = {
-                'roomList': lobbyClients
+            # Send updated room to all users in room
+            client_room = ROOM_CLIENT_MAP[room]
+            roomClients = {client: CLIENT_USERNAME[client] for client in client_room.keys()}
+            msg_room = {
+                'clients': roomClients
             }
             
-            emit('lobby-update', msg_lobby, to=room)
+            emit('room-update', msg_room, to=room)
+            
+            # Send updated lobby to all users connected to the server
+            
+            lobbyClients = {num: len(lobby) for num, lobby in ROOM_CLIENT_MAP.items()}
+            print(lobbyClients)
+            
+            emit('lobby-update', lobbyClients, broadcast=True)
+            
         
         return out
         
@@ -117,7 +123,6 @@ def update_lobby(fn):
 # Base Events #
 ###############
 @socket.on('connect')
-@update_lobby
 def setupClient():
     """
     First time setup when a client connects to the socket server. Sets default values for client unless logged in.
@@ -176,28 +181,18 @@ def roomChange(room):
 def gameReady():
     global ROOM_SCORE
     
-    username = session.get('userName', None)
-    
-    if username is None:
-        emit('error', "Username is not set")
-        return
-    
-    
-    roomNum = session['room'] 
+    username = session.get('username')    
+    roomNum = session.get('room')
     room = ROOM_CLIENT_MAP[roomNum]
     
     room[request.sid] = 1
     
     room_isReady = all(v for v in room.values())
     if room_isReady:
-        
         ROOM_SCORE[roomNum] = {}
-        
         emit('start-game', to=roomNum)
     else:
         emit('waiting-game')
-    
-    print(room)
     
 
 
@@ -234,11 +229,18 @@ def gameEnd():
     gameId = str(uuid4())
     room = session['room']
     
-    ROOM_CLIENT_MAP[room][request.sid] = 2
-    
     curRoom = ROOM_CLIENT_MAP[room]
+    
+    curRoom[request.sid] = 2
+    print(curRoom)
+    
     if all(ready == 2 for ready in curRoom.values()):
     
         with open(f"{gameId}.json", 'w') as json_file:
-            score = ROOM_SCORE.pop()
+            score = ROOM_SCORE.pop(room)
             json.dump(score, json_file)
+            
+        for client in curRoom:
+            curRoom[client] = 0
+            
+        print(f"Game stored in {gameId}.json")
