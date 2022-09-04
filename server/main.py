@@ -1,6 +1,7 @@
-from flask import Blueprint, redirect, url_for, render_template
+from urllib import request
+from flask import Blueprint, render_template, send_from_directory, request
 
-main = Blueprint("main", __name__)
+main = Blueprint("main", __name__, static_folder='static')
 
 @main.route("/")
 def home():
@@ -9,3 +10,7 @@ def home():
 @main.route("/game")
 def game():
     return render_template('game.jinja')
+
+@main.route("/humans.txt")
+def humans():
+    return send_from_directory(main.static_folder, 'humans.txt')
