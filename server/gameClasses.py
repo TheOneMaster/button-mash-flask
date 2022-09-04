@@ -2,7 +2,7 @@
 
 This file is a WIP. It is an attempt at a rewrite for the game to follow an object oriented structure.
 
-It is still mostly incomplete. Work will continue once the base functionality of the website has been finished.
+It is still mostly incomplete. It will be integrated only once the base functionality has been finished.
 
 """
 
@@ -11,6 +11,9 @@ from flask_socketio import emit, leave_room, join_room
 
 from enum import Enum
 from random import randint
+from uuid import uuid4
+from datetime import datetime
+from jsonlines import Writer
 
 class RoomStatus(Enum):
     
@@ -31,20 +34,24 @@ class Room():
     NUM_MAP = {}
     DEFAULT_ROOM = 1000
     
-    def __init__(self, number=None):
+    def __init__(self, number: int=None):
         
         if number is None:
             number = Room.DEFAULT_ROOM
         
-        self.number = self.__generate_number(room)
+        self.number = self.__generate_number(number)
         self.status = RoomStatus.OPEN
         
         self.clients = []
-    
-    
-    def __generate_number(self, num):
+        self.score = {}
         
-        if num not in num_map:
+        self.start_time = None
+        self.end_time = None
+    
+    
+    def __generate_number(self, num: int):
+        
+        if num not in Room.NUM_MAP:
             return num
         
         else:
@@ -55,13 +62,13 @@ class Room():
         
         if self.status == RoomStatus.OPEN:
             self.clients.append(user)
-            user.room = self
             
             if len(self.clients) == 4:
                 self.status = RoomStatus.CLOSED
                 
             join_room(self.number)
-            lobbyUpdate()
+            self.roomUpdate()
+            Room.lobbyUpdate()
             
         else:
             raise ValueError("Room is full")
@@ -74,24 +81,117 @@ class Room():
             self.status = RoomStatus.OPEN
             
         leave_room(self.number)
-        lobbyUpdate()
+        self.roomUpdate()
+        Room.lobbyUpdate()
 
-    def lobbyUpdate(self):
+    def roomUpdate(self):
         
-        msg = {
-            'roomList': [client.username for client in self.clients]
-        }
+        msg = {client.sid: client.username for client in self.clients}
         
         emit('lobby-update', msg, to=self.number)
+    
+    def checkUsersReady(self, status) -> bool:
+        """Checks if all users share the same status
+
+        Args:
+            status (UserStatus): The status against which all clients in the room will be tested
+
+        Returns:
+            bool: The boolean value of the check
+        """
+                
+        check = all(client.status == status for client in self.clients)
+        
+        return check
+    
+    
+    def gameStart(self):
+        
+        self.status = RoomStatus.ACTIVE
+        
+        for client in self.clients:
+            client.status = UserStatus.ACTIVE
+            
+        self.start_time = datetime.now()
+        
+        emit('start-game', to=self.number)
+    
+    def updateScore(self, tick, user, score):
+        
+        if tick not in self.score:
+            index = self.clients.index(user)
+            scores = [None for i in self.clients]
+            scores[index] = score
+            
+            self.score[tick] = scores
+            
+        else:
+            index = self.clients.index(user)
+            scores = self.scores[tick]
+            scores[index] = score
+            
+        if None not in scores:
+            
+            curr_time = datetime.now()
+            
+            # Get scores (clicks per second) from the totalPresses recorded in the tick
+            scores = [score/(curr_time - self.start_time) for score in scores]
+            
+            # Round scores to 3 decimal places
+            scores = [round(score, 3) for score in scores]
+            
+            emit('game-score', scores, to=self.number)
+
+    def gameEnd(self):
+        
+        self.status = RoomStatus.END
+        
+        for client in self.clients:
+            client.status = UserStatus.READY
+            
+        gameID = str(uuid4)
+        
+        json = {
+            "id": gameID,
+            "datetime": datetime.now(),
+            "users": [client.username for client in self.clients],
+            "score": self.score
+        }
+        
+        file_path = "/json-store/data-store.jsonl"
+        
+        with Writer(file_path, 'a+', compact=True) as jsonl:
+            
+            jsonl.write(json)
+            
+            print(f"Game {gameID} written to data storage")
+            
+        
+        
+        
+    
+    
+    @staticmethod
+    def lobbyUpdate():
+        
+        msg = {number: len(room.clients) for number, room in Room.NUM_MAP.items()}
+        
+        emit('lobby-update', msg, broadcast=True)
 
     @staticmethod
-    def getOpen():
+    def getOpenRoom():
         """ Return an open room for a user to join."""
-        open_room = False
-        for room in NUM_MAP.values():
+        
+        # Find if open rooms exist
+        for room in Room.NUM_MAP.values():
             if room.status == RoomStatus.OPEN:
-                open_room = room
-                break
+                return room
+        
+        # Create a new room
+        open_room = False    
+        open_room = Room()
+        
+        return open_room
         
             
   
@@ -103,7 +203,7 @@ class User():
         self.username = username
         self.addr = addr
         
-        self.room = Room()
+        self.room = Room.getOpenRoom()
         self.room.addUser(self)
         
         self.status = UserStatus.READY
@@ -114,4 +214,7 @@ class User():
     def changeRoom(self, room):
         
         self.room.removeUser(self)
+        
+        new_room = Room.NUM_MAP[room]
+        new_room.addUser(self)
         
