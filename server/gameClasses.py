@@ -106,8 +106,7 @@ class Room():
         check = all(client.status == status for client in self.clients)
         
         return check
-    
-    
+      
     def gameStart(self):
         
         self.status = RoomStatus.ACTIVE
@@ -130,7 +129,7 @@ class Room():
             
         else:
             index = self.clients.index(user)
-            scores = self.scores[tick]
+            scores = self.score[tick]
             scores[index] = score
             
         if None not in scores:
@@ -138,56 +137,48 @@ class Room():
             curr_time = datetime.now()
             
             # Get scores (clicks per second) from the totalPresses recorded in the tick
-            scores = [score/((curr_time - self.start_time)/1000) for score in scores]
+            delta = curr_time - self.start_time
+            delta_seconds = delta.total_seconds()
+            
+            scores = [score/(delta_seconds) for score in scores]
             
             # Round scores to 3 decimal places
             scores = [round(score, 3) for score in scores]
             
-            scores = {client: score for score, client in zip(scores, self.clients)}
+            scores = {client.username: score for score, client in zip(scores, self.clients)}
             
             emit('game-score', scores, to=self.number)
 
-    def gameEnd(self, user):
+    def gameEnd(self):
         
-        user.status = UserStatus.READY
+        self.status = RoomStatus.END
+            
+        gameID = str(uuid4)
         
-        all_users_finished = self.checkUsersStatus(UserStatus.READY)
+        json = {
+            "id": gameID,
+            "datetime": datetime.now(),
+            "users": [client.username for client in self.clients],
+            "score": self.score
+        }
         
-        if all_users_finished:
-            self.status = RoomStatus.END
-                
-            gameID = str(uuid4)
-            
-            json = {
-                "id": gameID,
-                "datetime": datetime.now(),
-                "users": [client.username for client in self.clients],
-                "score": self.score
-            }
-            
-            file_path = "/json-store/data-store.jsonl"
-            
-            # Write game data to jsonl file
-            with Writer(file_path, 'a+', compact=True) as jsonl:
-                jsonl.write(json)
-                
-                print(f"Game {gameID} written to data storage")     
-            
-            # Reset instance variables for the game
-            self.start_time = None
-            self.score = {}
-            
-        else:
-            return
-            
+        file_path = "/json-store/data-store.jsonl"
         
+        # Write game data to jsonl file
+        # with Writer(file_path, 'a+', compact=True) as jsonl:
+        #     jsonl.write(json)
+            
+        #     print(f"Game {gameID} written to data storage")     
         
-        
+        # Reset instance variables for the game
+        self.start_time = None
+        self.score = {}       
     
     
     @staticmethod
     def lobbyUpdate():
-        
+        """Update the whole lobby about any room changes
+        """
         msg = {number: len(room.clients) for number, room in Room.NUM_MAP.items()}
         
         emit('lobby-update', msg, broadcast=True)
