@@ -178,6 +178,19 @@ footer p {
     transition: 1s;
 }
 
+.lobby-screen {
+    height: 100%;
+    justify-content: space-around;
+}
+
+.client-screen {
+    justify-content: space-between;
+    padding: 10px;
+    margin: 20px;
+}
+
+
+
 #settingsGear {
     position: absolute;
     top: 10px;

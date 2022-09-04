@@ -8,8 +8,6 @@ from uuid import uuid4
 from random_username.generate import generate_username
 from functools import wraps
 
-from .database import Game
-
 socket = SocketIO()
 
 DEFAULT_ROOM = 1000
@@ -101,11 +99,8 @@ def update_lobby(fn):
             # Send updated room to all users in room
             client_room = ROOM_CLIENT_MAP[room]
             roomClients = {client: CLIENT_USERNAME[client] for client in client_room.keys()}
-            msg_room = {
-                'clients': roomClients
-            }
             
-            emit('room-update', msg_room, to=room)
+            emit('room-update', roomClients, to=room)
             
             # Send updated lobby to all users connected to the server
             

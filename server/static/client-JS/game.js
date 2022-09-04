@@ -61,7 +61,7 @@ function changeUsername() {
 }
 
 socket.on("connect", () => {
-  console.log(socket.id);
+  // console.log(socket.id);
 });
 
 socket.on("error", (msg) => {
@@ -88,20 +88,42 @@ socket.on("client-settings", (json) => {
     curRoomEl.textContent = `Current room ID: ${room}`;
   }
 
-  console.log("Updated settings");
+  // console.log("Updated settings");
 });
+
+socket.on('room-update', (clients) => {
+  
+  let template = document.getElementById('clientMain').content.firstElementChild;
+  let client_screen = document.getElementById('lobbyMain');
+
+  let clientList = []
+  for (let client in clients) {
+    let clone = template.cloneNode(true);
+    let name = clone.querySelector("h3");
+
+    clone.dataset.sid = client;
+
+    name.textContent = clients[client];
+    
+    clientList.push(clone);
+
+  }
+
+  console.log(clientList)
+
+  client_screen.replaceChildren(...clientList);
+
+})
 
 socket.on("lobby-update", (rooms) => {
 
-  console.log(rooms)
-
-  let test = document.getElementById('testTemplate').content.firstElementChild;
+  let template = document.getElementById('roomTemplate').content.firstElementChild;
   let grid = document.getElementById('lobbyGrid');
 
   // Create list of lobbies from json file
   let rows = []
   for (let room in rooms) {
-    let clone = test.cloneNode(true);
+    let clone = template.cloneNode(true);
     let button = clone.querySelector("h4");
     let circle = clone.querySelector(".circle");
 
@@ -183,13 +205,11 @@ const game = {
 
   gameLoop: function () {
     game.current_time = new Date().getTime();
-    game.score =
-      game.totalPress / ((game.current_time - game.start_time) / 1000);
     game.tick += 1;
 
     let msg = {
       tick_id: game.tick,
-      score: game.score,
+      score: game.totalPress,
     };
 
     socket.emit("game-tick", msg);

@@ -9,6 +9,25 @@
 <div class="game-container flex-row">
     <div class="game-main" id="gameMain" tabindex="1">
         <img id="settingsGear" src="{{ url_for('static', filename='Images/gear.png') }}">
+
+        <div class="lobby-screen flex-row" id="lobbyMain">
+        
+            <template class="client-screen flex-col" id="clientMain">
+
+                <div class="client-screen flex-col">
+                    <div class="client-score">
+                        <output></output>
+                    </div>
+                    
+                    <div class="client-username">
+                        <h3></h3>
+                    </div>
+                </div>
+            
+            </template>
+
+        </div>
+    
     </div>
 
     <div class="game-settings flex-col settings-transition hidden" id="gameSettings">
@@ -21,8 +40,6 @@
             <button id="changeUserBtn" class="user-btn submit-btn btn" onclick="">Change username</button>
 
         </div>
-
-        
 
         <div class="room-settings settings-div flex-col">
 
@@ -47,9 +64,7 @@
 
         <div class="lobby-div grid" id="lobbyGrid">
 
-            
-
-            <template id="testTemplate">
+            <template id="roomTemplate">
                 <div class="lobby-row flex-row">
                 
                     <h4></h4>
