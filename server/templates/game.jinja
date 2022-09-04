@@ -11,22 +11,21 @@
         <img id="settingsGear" src="{{ url_for('static', filename='Images/gear.png') }}">
 
         <div class="lobby-screen flex-row" id="lobbyMain">
-        
-            <template class="client-screen flex-col" id="clientMain">
-
-                <div class="client-screen flex-col">
-                    <div class="client-score">
-                        <output></output>
-                    </div>
-                    
-                    <div class="client-username">
-                        <h3></h3>
-                    </div>
-                </div>
-            
-            </template>
-
         </div>
+
+        <template class="client-screen flex-col" id="clientMain">
+
+            <div class="client-screen flex-col">
+                <div class="client-score">
+                    <output></output>
+                </div>
+                
+                <div class="client-username">
+                    <h3></h3>
+                </div>
+            </div>
+        
+        </template>
     
     </div>
 
@@ -63,17 +62,16 @@
         <h2>Lobby List</h2>
 
         <div class="lobby-div grid" id="lobbyGrid">
-
-            <template id="roomTemplate">
-                <div class="lobby-row flex-row">
-                
-                    <h4></h4>
-                    <div class="circle"></div>
-
-                </div>
-            </template>
-
         </div>
+
+        <template id="roomTemplate">
+            <div class="lobby-row flex-row">
+            
+                <h4></h4>
+                <div class="circle"></div>
+
+            </div>
+        </template>
 
         <div class="lobby-options">
 
@@ -89,4 +87,5 @@
 <script type="text/javascript">
     addEventHandlers()
 </script>
+
 {% endblock %}
