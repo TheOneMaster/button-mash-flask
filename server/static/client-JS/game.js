@@ -165,7 +165,7 @@ socket.on("game-score", (score) => {
 });
 
 const game = {
-  maxTime: 10,
+  maxTime: 5,
   totalPress: 0,
   score: 0,
 
