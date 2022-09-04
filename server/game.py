@@ -86,6 +86,11 @@ def gameTick(tick):
 def gameEnd():
     
     user = session.get('user')
+    user.status = UserStatus.READY
     
     room = user.room
-    room.gameEnd(user)
+    
+    all_users_finished = room.checkUsersStatus(UserStatus.READY)
+    
+    if all_users_finished:
+        room.gameEnd()
