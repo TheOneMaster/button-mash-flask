@@ -1,5 +1,6 @@
 from urllib import request
 from flask import Blueprint, render_template, send_from_directory, request
+from . import game
 
 main = Blueprint("main", __name__, static_folder='static')
 

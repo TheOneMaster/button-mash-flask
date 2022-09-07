@@ -4,7 +4,10 @@ from enum import Enum
 from random import randint
 from uuid import uuid4
 from datetime import datetime
-from jsonlines import Writer
+import jsonlines as jsonl
+from collections import deque
+
+from .main import MashGame
 
 class RoomStatus(Enum):   
     OPEN = 0
@@ -107,74 +110,23 @@ class Room():
         
         return check
       
-    def gameStart(self):
+    def playGame(self):
         
         self.status = RoomStatus.ACTIVE
         
         for client in self.clients:
             client.status = UserStatus.ACTIVE
             
-        self.start_time = datetime.now()
-        
-        emit('start-game', to=self.number)
-    
-    def updateScore(self, tick, user, score):
-        
-        if tick not in self.score:
-            index = self.clients.index(user)
-            scores = [None for i in self.clients]
-            scores[index] = score
-            
-            self.score[tick] = scores
-            
-        else:
-            index = self.clients.index(user)
-            scores = self.score[tick]
-            scores[index] = score
-            
-        if None not in scores:
-            
-            curr_time = datetime.now()
-            
-            # Get scores (clicks per second) from the totalPresses recorded in the tick
-            delta = curr_time - self.start_time
-            delta_seconds = delta.total_seconds()
-            
-            scores = [score/(delta_seconds) for score in scores]
-            
-            # Round scores to 3 decimal places
-            scores = [round(score, 3) for score in scores]
-            
-            scores = {client.username: score for score, client in zip(scores, self.clients)}
-            
-            emit('game-score', scores, to=self.number)
-
-    def gameEnd(self):
+        self.game = MashGame(self, time=5)
+        self.game.start_game()
         
         self.status = RoomStatus.END
+        
+        for client in self.clients:
+            client.status = UserStatus.READY
             
-        gameID = str(uuid4)
+        self.game.end_game()
         
-        json = {
-            "id": gameID,
-            "datetime": datetime.now(),
-            "users": [client.username for client in self.clients],
-            "score": self.score
-        }
-        
-        file_path = "/json-store/data-store.jsonl"
-        
-        # Write game data to jsonl file
-        # with Writer(file_path, 'a+', compact=True) as jsonl:
-        #     jsonl.write(json)
-            
-        #     print(f"Game {gameID} written to data storage")     
-        
-        # Reset instance variables for the game
-        self.start_time = None
-        self.score = {}       
-    
-    
     @staticmethod
     def lobbyUpdate():
         """Update the whole lobby about any room changes
@@ -216,6 +168,7 @@ class User():
         self._username = username
         
         self.status = UserStatus.READY
+        self.latency = deque(maxlen=5)
         
         self.room = Room.getOpenRoom()
         
@@ -240,9 +193,10 @@ class User():
         
         # Update room
         self.room.roomUpdate()
-        
+       
     def update(self):
-        
+        """Update the client when changes are made
+        """
         name = self._username
         room = self.room.number
         
@@ -253,7 +207,6 @@ class User():
         
         emit('client-settings', msg)
     
-  
     def changeRoom(self, room):
         
         self.room.removeUser(self)
