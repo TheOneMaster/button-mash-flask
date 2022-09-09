@@ -85,5 +85,3 @@ def gameTick(tick):
     game = room.game
     
     game.update_score(user, score)
-    
-    # room.updateScore(tick_num, user, score)
