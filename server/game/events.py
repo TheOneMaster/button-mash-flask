@@ -5,7 +5,7 @@ from flask_login import current_user
 
 from random_username.generate import generate_username
 
-from .classes import User, UserStatus
+from .classes import Client, ClientStatus, RoomStatus
 from .. import socket
 
 
@@ -21,7 +21,7 @@ def setupClient():
     sid = request.sid
     addr = request.remote_addr
     
-    user = User(sid, username, addr)   
+    user = Client(sid, username, addr)   
     session['user'] = user
     
     print(user)
@@ -65,9 +65,9 @@ def ping():
 def gameReady():
     
     user = session.get("user")
-    user.status = UserStatus.WAITING
+    user.status = ClientStatus.WAITING
     
-    all_users_ready = user.room.checkUsersStatus(UserStatus.WAITING)
+    all_users_ready = user.room.checkUsersStatus(ClientStatus.WAITING)
     
     if all_users_ready:
         user.room.playGame()
@@ -82,6 +82,8 @@ def gameTick(tick):
     user = session.get('user')
     
     room = user.room
-    game = room.game
     
-    game.update_score(user, score)
+    if room.status != RoomStatus.END:
+        game = room.game
+        
+        game.update_score(user, score)

@@ -60,6 +60,9 @@ function changeUsername() {
   }
 }
 
+function startGame() {
+  socket.emit('game-ready');
+}
 
 let ping = undefined;
 let ping_start = undefined
@@ -72,9 +75,7 @@ function sendPing() {
 
 
 socket.on("connect", () => {
-  // console.log(socket.id);
-
-  ping_loop = setInterval(sendPing, 1000);
+  ping_loop = setInterval(sendPing, 5000);
 
 });
 
@@ -173,8 +174,18 @@ socket.on("lobby-update", (rooms) => {
 
 // Game events
 
-socket.on("start-game", () => {
+socket.on("start-game", (settings) => {
   console.log("Starting game");
+
+  let freq = settings.freq;
+  let time = settings.time;
+
+  game.updateSettings(freq, time);
+
+  // Hide div in middle of screen
+  let buttonsDiv = document.getElementById("gameButtons");
+  buttonsDiv.classList.add("removed");
+
   game.initGame();
 });
 
@@ -185,10 +196,14 @@ socket.on("waiting-game", () => {
 socket.on("game-score", (score) => {
   let gameLobby = document.getElementById('lobbyMain');
 
+  for (let username in score) {
+    let userDiv = gameLobby.querySelector(`[data-username="${username}"]`);
+    let output = userDiv.querySelector('output');
+
+    output.textContent = score[username];
+  }
+
   console.log(score)
-  // for (client of score) {
-  //   console.log(client);
-  // }
 });
 
 socket.on('game-end', () => {
@@ -210,6 +225,11 @@ const game = {
   tick: 0,
 
   gameLoop: undefined,
+
+  updateSettings(freq, time) {
+    this.freq = freq;
+    this.maxTime = time;
+  },
 
   resetGame: function () {
     game.totalPress = 0;
