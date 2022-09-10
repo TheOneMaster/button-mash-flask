@@ -4,10 +4,10 @@ from enum import Enum
 from random import randint
 from uuid import uuid4
 from datetime import datetime
-import jsonlines as jsonl
+import jsonlines
 from collections import deque
 
-from .main import MashGame
+from .. import socket
 
 class RoomStatus(Enum):   
     OPEN = 0
@@ -16,11 +16,175 @@ class RoomStatus(Enum):
     ACTIVE = 3
     END = 4
 
-class UserStatus(Enum): 
+class ClientStatus(Enum): 
     READY = 0
     WAITING = 1
     ACTIVE = 2
 
+
+  
+class Client():
+      
+    def __init__(self, sid:str=None, username:str=None, addr:str=None):
+        """Create a storage class for a client's data.
+
+        Args:
+            sid (str, optional): The client's socket ID. Defaults to None.
+            username (str, optional): The username of the client. Defaults to None.
+            addr (str, optional): The remote address of the client. Defaults to None.
+        """
+        
+        self.sid = sid
+        self.addr = addr
+        self._username = username
+        
+        self.status = ClientStatus.READY
+        self.latency = deque(maxlen=5)
+        
+        self.room = Room.getOpenRoom()
+        
+        self.update()
+        
+        self.room.addUser(self)
+        
+    def __str__(self):
+        return f"{self.username} connected at {self.addr}"
+    
+    @property
+    def username(self):
+        return self._username
+    
+    @username.setter
+    def username(self, new_name):
+        
+        self._username = new_name
+        
+        # Update client settings
+        self.update()
+        
+        # Update room
+        self.room.roomUpdate()
+       
+       
+    def update(self):
+        """Update the client when changes are made
+        """
+        
+        msg = {
+            "username": self._username,
+            "room": self.room.number
+        }
+        
+        emit('client-settings', msg)
+    
+    def changeRoom(self, room):
+        
+        self.room.removeUser(self)
+        
+        new_room = Room.NUM_MAP.get(room, None)
+        
+        if new_room is None:
+            new_room = Room(room)
+        
+        else:
+            try: 
+                new_room.addUser(self)
+                
+            except ValueError as error:
+                emit('error', str(error))
+        
+        self.room = new_room
+        
+        self.update()
+        self.room.addUser(self)
+    
+    def delete(self):
+        """Delete the User by removing all references to the object.
+        """        
+        self.room.removeUser(self)
+
+
+class MashGame():
+    
+    def __init__(self, room, time=10, freq=30) -> None:
+        
+        self.gameTime = time
+        self.freq = freq
+        self.room = room
+        
+        self.tickTime = 1/freq
+        self.totalTicks = freq * time
+        self.ticks = [None] * self.totalTicks
+        
+        self.startTime = None
+        self._cur_score = None
+        
+    def start_game(self):
+        self.startTime = datetime.now()
+        self._cur_score = [0 for i in self.room.clients]
+        
+        msg = {
+            "freq": self.freq,
+            "time": self.gameTime
+        }
+        
+        emit("start-game", msg, to=self.room.number)
+        
+        # Run game
+        self.game_loop()
+                   
+    def game_loop(self):
+        
+        for i in range(self.totalTicks):
+            
+            total_score = self._cur_score.copy()
+            self.ticks[i] = total_score
+            
+            cur_time = datetime.now()
+            
+            # Use time delta from start to now to calculate score (clicks per second)
+            delta = cur_time - self.startTime
+            delta_sec = delta.total_seconds()
+            
+            scores = [score/delta_sec for score in total_score]
+            
+            # Round to 3 decimal places
+            scores = [round(score, 3) for score in scores]
+            
+            usernames = [client.username for client in self.room.clients]
+            
+            scores = {username: score for username, score in zip(usernames, scores)}
+            
+            emit('game-score', scores, to=self.room.number)
+            
+            socket.sleep(self.tickTime)
+            
+    def end_game(self):
+        
+        json_store_path = "json-store/data-store.jsonl"
+        gameID = str(uuid4())
+               
+        with jsonlines.open(json_store_path, mode='a', compact=True) as jsonl:
+            
+            json = {
+                "id": gameID,
+                "datetime": str(datetime.now()),
+                "players": [client.username for client in self.room.clients],
+                "ticks": self.ticks
+            }
+            
+            jsonl.write(json)
+            
+            print(f"Game: {gameID} has been written to data storage")
+            
+            emit('game-end', to=self.room.number)
+            
+    def update_score(self, client, score):
+        
+        index = self.room.clients.index(client)
+        
+        self._cur_score[index] = score
+        
 
 class Room():
     
@@ -52,11 +216,10 @@ class Room():
     
     def __generate_number(self, num: int):
         
-        if num not in Room.NUM_MAP:
-            return num
-        
-        else:
-            return randint(0, 1000)
+        while num in Room.NUM_MAP:
+            num = randint(0, 1000)
+            
+        return num
     
             
     def addUser(self, user):
@@ -115,7 +278,7 @@ class Room():
         self.status = RoomStatus.ACTIVE
         
         for client in self.clients:
-            client.status = UserStatus.ACTIVE
+            client.status = ClientStatus.ACTIVE
             
         self.game = MashGame(self, time=5)
         self.game.start_game()
@@ -123,9 +286,10 @@ class Room():
         self.status = RoomStatus.END
         
         for client in self.clients:
-            client.status = UserStatus.READY
+            client.status = ClientStatus.READY
             
         self.game.end_game()
+        del self.game
         
     @staticmethod
     def lobbyUpdate():
@@ -144,91 +308,7 @@ class Room():
             if room.status == RoomStatus.OPEN:
                 return room
         
-        # Create a new room
-        open_room = False    
+        # Create a new room  
         open_room = Room()
         
-        return open_room
-        
-            
-  
-class User():
-      
-    def __init__(self, sid=None, username=None, addr=None):
-        """Create a storage class for a client's data.
-
-        Args:
-            sid (str, optional): The client's socket ID. Defaults to None.
-            username (str, optional): The username of the client. Defaults to None.
-            addr (str, optional): The remote address of the client. Defaults to None.
-        """
-        
-        self.sid = sid
-        self.addr = addr
-        self._username = username
-        
-        self.status = UserStatus.READY
-        self.latency = deque(maxlen=5)
-        
-        self.room = Room.getOpenRoom()
-        
-        self.update()
-        
-        self.room.addUser(self)
-        
-    def __str__(self):
-        return f"{self.username} connected at {self.addr}"
-    
-    @property
-    def username(self):
-        return self._username
-    
-    @username.setter
-    def username(self, new_name):
-        
-        self._username = new_name
-        
-        # Update client settings
-        self.update()
-        
-        # Update room
-        self.room.roomUpdate()
-       
-    def update(self):
-        """Update the client when changes are made
-        """
-        name = self._username
-        room = self.room.number
-        
-        msg = {
-            "username": name,
-            "room": room
-        }
-        
-        emit('client-settings', msg)
-    
-    def changeRoom(self, room):
-        
-        self.room.removeUser(self)
-        
-        new_room = Room.NUM_MAP.get(room, None)
-        
-        if new_room is None:
-            new_room = Room(room)
-        
-        else:
-            try: 
-                new_room.addUser(self)
-                
-            except ValueError as error:
-                emit('error', str(error))
-        
-        self.room = new_room
-        
-        self.update()
-        self.room.addUser(self)
-    
-    def delete(self):
-        """Delete the User by removing all references to the object.
-        """        
-        self.room.removeUser(self)
+        return open_room            
