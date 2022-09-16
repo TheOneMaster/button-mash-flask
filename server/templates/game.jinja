@@ -9,6 +9,11 @@
 <div class="game-container flex-row">
     <div class="game-main" id="gameMain" tabindex="1">
         <img id="settingsGear" src="{{ url_for('static', filename='Images/gear.png') }}">
+        
+        <div class="game-buttons flex-row" id="gameButtons">
+            <button id="game-start" class="btn" onclick="startGame()">Start Game</button>
+            <h2 id="game-waiting" class="hidden">Waiting...</h2>
+        </div>
 
         <div class="lobby-screen flex-row" id="lobbyMain">
         </div>
@@ -28,7 +33,7 @@
         </template>
     
     </div>
-
+    
     <div class="game-settings flex-col settings-transition hidden" id="gameSettings">
 
         <div class="username-settings settings-div flex-col" >
