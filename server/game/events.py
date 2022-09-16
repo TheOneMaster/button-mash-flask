@@ -1,20 +1,18 @@
 from flask import request, session
 
-from flask_socketio import SocketIO, emit
+from flask_socketio import emit
 from flask_login import current_user
 
 from random_username.generate import generate_username
 
-from .gameClasses import User, Room, UserStatus
-
-socket = SocketIO()
+from .classes import Client, ClientStatus, RoomStatus
+from .. import socket
 
 
 @socket.on('connect')
 def setupClient():
     
     username = None
-    
     if current_user.is_authenticated:
         username = current_user.username
     else:
@@ -23,8 +21,7 @@ def setupClient():
     sid = request.sid
     addr = request.remote_addr
     
-    user = User(sid, username, addr)
-    
+    user = Client(sid, username, addr)   
     session['user'] = user
     
     print(user)
@@ -57,17 +54,23 @@ def roomChange(number):
     
     user.changeRoom(number)
 
+
+@socket.on('latency-ping')
+def ping():
     
+    emit('latency-pong')
+
+
 @socket.on('game-ready')
 def gameReady():
     
     user = session.get("user")
-    user.status = UserStatus.WAITING
+    user.status = ClientStatus.WAITING
     
-    all_users_ready = user.room.checkUsersStatus(UserStatus.WAITING)
+    all_users_ready = user.room.checkUsersStatus(ClientStatus.WAITING)
     
     if all_users_ready:
-        user.room.gameStart()
+        user.room.playGame()
     else:
         emit('waiting-game')
 
@@ -80,17 +83,7 @@ def gameTick(tick):
     
     room = user.room
     
-    room.updateScore(tick_num, user, score)
-    
-@socket.on('game-end')
-def gameEnd():
-    
-    user = session.get('user')
-    user.status = UserStatus.READY
-    
-    room = user.room
-    
-    all_users_finished = room.checkUsersStatus(UserStatus.READY)
-    
-    if all_users_finished:
-        room.gameEnd()
+    if room.status != RoomStatus.END:
+        game = room.game
+        
+        game.update_score(user, score)

@@ -4,8 +4,8 @@ from flask import url_for
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 
+from . import db
 
-db = SQLAlchemy()
 
 userGames = db.Table('userGames',
                      db.Column('user_id', db.String, db.ForeignKey('user.id'), primary_key=True),

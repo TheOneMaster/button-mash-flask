@@ -1,14 +1,16 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
-from urllib.request import urlopen
-import json
 
-from .database import db, User
+from . import db, login_manager
+from .models import User
 from .helper import no_login
 
 auth = Blueprint("auth", __name__)
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 @auth.route("/signup")
 @no_login
@@ -46,6 +48,7 @@ def signup_post():
     db.session.commit()
     
     return redirect(url_for('auth.login'))
+
 
 @auth.route("/login")
 @no_login

@@ -60,9 +60,32 @@ function changeUsername() {
   }
 }
 
+function startGame() {
+  socket.emit('game-ready');
+}
+
+let ping = undefined;
+let ping_start = undefined
+let ping_loop = undefined
+
+function sendPing() {
+  ping_start = new Date().getTime();
+  socket.volatile.emit('latency-ping');
+}
+
+
 socket.on("connect", () => {
-  // console.log(socket.id);
+  ping_loop = setInterval(sendPing, 5000);
+
 });
+
+socket.on('latency-pong', () => {
+  current_time = new Date().getTime();
+
+  ping = (current_time - ping_start)/2;
+  console.log(ping)
+})
+
 
 socket.on("error", (msg) => {
   alert(msg);
@@ -100,16 +123,16 @@ socket.on('room-update', (clients) => {
   for (let client in clients) {
     let clone = template.cloneNode(true);
     let name = clone.querySelector("h3");
+    
+    let username = clients[client]
 
-    clone.dataset.sid = client;
-
-    name.textContent = clients[client];
+    clone.dataset.username = username;
+    name.textContent = username;
     
     clientList.push(clone);
-
   }
 
-  console.log(clientList)
+  // console.log(clientList)
 
   client_screen.replaceChildren(...clientList);
 
@@ -151,8 +174,18 @@ socket.on("lobby-update", (rooms) => {
 
 // Game events
 
-socket.on("start-game", () => {
+socket.on("start-game", (settings) => {
   console.log("Starting game");
+
+  let freq = settings.freq;
+  let time = settings.time;
+
+  game.updateSettings(freq, time);
+
+  // Hide div in middle of screen
+  let buttonsDiv = document.getElementById("gameButtons");
+  buttonsDiv.classList.add("removed");
+
   game.initGame();
 });
 
@@ -161,8 +194,21 @@ socket.on("waiting-game", () => {
 });
 
 socket.on("game-score", (score) => {
-  console.log(score);
+  let gameLobby = document.getElementById('lobbyMain');
+
+  for (let username in score) {
+    let userDiv = gameLobby.querySelector(`[data-username="${username}"]`);
+    let output = userDiv.querySelector('output');
+
+    output.textContent = score[username];
+  }
+
+  console.log(score)
 });
+
+socket.on('game-end', () => {
+  game.gameEnd()
+})
 
 const game = {
   maxTime: 5,
@@ -177,6 +223,13 @@ const game = {
   // FPS
   freq: 30,
   tick: 0,
+
+  gameLoop: undefined,
+
+  updateSettings(freq, time) {
+    this.freq = freq;
+    this.maxTime = time;
+  },
 
   resetGame: function () {
     game.totalPress = 0;
@@ -193,14 +246,14 @@ const game = {
 
     game.start_time = new Date().getTime();
 
-    let gameloop = setInterval(game.gameLoop, 1000 / game.freq);
-    setTimeout(() => game.gameEnd(gameloop), 1000 * game.maxTime);
+    game.gameLoop = setInterval(game.gameLoop, 1000 / game.freq);
+    // setTimeout(() => game.gameEnd(gameloop), 1000 * game.maxTime);
   },
 
   setCallbacks: function () {
-    let gameContainer = document.getElementById("gameMain");
-    gameContainer.addEventListener("keydown", game.__keypress__);
-    gameContainer.focus();
+    // let gameContainer = document.getElementById("gameMain");
+    document.body.addEventListener("keydown", game.__keypress__);
+    // gameContainer.focus();
   },
 
   gameLoop: function () {
@@ -215,13 +268,13 @@ const game = {
     socket.emit("game-tick", msg);
   },
 
-  gameEnd: function (loop) {
-    clearInterval(loop);
+  gameEnd: function () {
+    clearInterval(game.gameLoop);
     socket.emit("game-end");
     game.resetGame();
 
-    let gameContainer = document.getElementById("gameMain");
-    gameContainer.removeEventListener("keydown", game.__keypress__);
+    // let gameContainer = document.getElementById("gameMain");
+    document.body.removeEventListener("keydown", game.__keypress__);
   },
 
   __keypress__: function (e) {
