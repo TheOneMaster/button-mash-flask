@@ -2,11 +2,11 @@
     Developer: Nayan
     E-mail: nayannair@yahoo.com
     Twitter: @amusingblade
-    Location: Bangalore, India
 
 /* SITE */
     Last update: 03-09-2022
     Language: English
     Doctype: HTML5
+    Languages: Python, JS
     Libraries: SocketIO, Flask
     IDE: VSCode
