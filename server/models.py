@@ -2,7 +2,6 @@ from uuid import uuid4
 from datetime import date, datetime
 from flask import url_for
 from flask_login import UserMixin
-from flask_sqlalchemy import SQLAlchemy
 
 from . import db
 

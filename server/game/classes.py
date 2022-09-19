@@ -5,7 +5,6 @@ from random import randint
 from uuid import uuid4
 from datetime import datetime
 import jsonlines
-from collections import deque
 
 from .. import socket
 
@@ -39,7 +38,6 @@ class Client():
         self._username = username
         
         self.status = ClientStatus.READY
-        self.latency = deque(maxlen=5)
         
         self.room = Room.getOpenRoom()
         
@@ -250,11 +248,12 @@ class Room():
             Room.NUM_MAP.pop(self.number)
         else:
             self.roomUpdate()
-            Room.lobbyUpdate()
+
+        Room.lobbyUpdate()
 
     def roomUpdate(self):
         
-        msg = {client.sid: client.username for client in self.clients}
+        msg = {client.sid: client._username for client in self.clients}
         print(self.number)
         
         emit('room-update', msg, to=self.number)
