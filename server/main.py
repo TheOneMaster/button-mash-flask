@@ -1,11 +1,15 @@
-from flask import Blueprint, redirect, url_for, render_template
+from flask import Blueprint, render_template, send_from_directory, redirect, url_for
 
-main = Blueprint("main", __name__)
+main = Blueprint("main", __name__, static_folder='static')
 
 @main.route("/")
 def home():
-    return render_template('index.jinja')
+    return redirect(url_for('main.game'))
 
 @main.route("/game")
 def game():
     return render_template('game.jinja')
+
+@main.route("/humans.txt")
+def humans():
+    return send_from_directory(main.static_folder, 'humans.txt')

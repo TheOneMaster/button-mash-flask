@@ -1,0 +1,96 @@
+{% extends "template.jinja" %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='client-JS/game.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+<div class="game-container flex-row">
+    <div class="game-main" id="gameMain" tabindex="1">
+        <img id="settingsGear" src="{{ url_for('static', filename='Images/gear.png') }}">
+        
+        <div class="game-buttons flex-row" id="gameButtons">
+            <button id="game-start" class="btn" onclick="startGame()">Start Game</button>
+            <h2 id="game-waiting" class="hidden">Waiting...</h2>
+        </div>
+
+        <div class="lobby-screen flex-row" id="lobbyMain">
+        </div>
+
+        <template class="client-screen flex-col" id="clientMain">
+
+            <div class="client-screen flex-col">
+                <div class="client-score">
+                    <output></output>
+                </div>
+                
+                <div class="client-username">
+                    <h3></h3>
+                </div>
+            </div>
+        
+        </template>
+    
+    </div>
+    
+    <div class="game-settings flex-col settings-transition hidden" id="gameSettings">
+
+        <div class="username-settings settings-div flex-col" >
+            
+            <h2>Username</h2>
+            <h3 class="settings-str" id="username-str">Username:</h3>
+            <input type="text" class="settings-input input" placeholder="Enter username" id="usernameInp">
+            <button id="changeUserBtn" class="user-btn submit-btn btn" onclick="changeUsername()">Change username</button>
+
+        </div>
+
+        <div class="room-settings settings-div flex-col">
+
+            <h2>Room Settings</h2>
+            <h3 id="roomId-str" class="settings-str">Current room ID: </h3>
+            <input type="text" class="settings-input input" placeholder="Enter room number" id="roomId">
+            <button id="changeRoomBtn" class="room-btn submit-btn btn" onclick="changeRoom()">Change Room</button>
+        
+        </div>
+
+    </div>
+
+</div>
+{% endblock  %}
+
+{% block modal %}
+<dialog class="lobby-dialog" id="lobbyModal">
+
+    <div class="dialog-container flex-col">
+
+        <h2>Lobby List</h2>
+
+        <div class="lobby-div grid" id="lobbyGrid">
+        </div>
+
+        <template id="roomTemplate">
+            <div class="lobby-row flex-row">
+            
+                <h4></h4>
+                <div class="circle"></div>
+
+            </div>
+        </template>
+
+        <div class="lobby-options">
+
+            <button class="lobby-btn btn">Join Lobby</button>
+
+        </div>
+
+    </div>
+    
+    
+
+</dialog>
+<script type="text/javascript">
+    addEventHandlers()
+</script>
+
+{% endblock %}
