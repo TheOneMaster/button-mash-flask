@@ -191,6 +191,14 @@ socket.on("start-game", (settings) => {
 
 socket.on("waiting-game", () => {
   console.log("Waiting for other players");
+
+  // Hide start button and show waiting text
+  let start_button = document.getElementById('game-start');
+  start_button.classList.add("hidden");
+
+  let waitEl = document.getElementById('game-waiting');
+  waitEl.classList.remove('hidden');
+
 });
 
 socket.on("game-score", (score) => {
