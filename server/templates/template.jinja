@@ -17,12 +17,12 @@
 <body>
     <div class="topbar flex-row">
         <a href="{{ url_for('main.home') }}" class="link-main link-top link">Button Mash</a>
-        <a href="{{ url_for('main.game') }}" class="link-top link">Game</a>
+        <!-- <a href="{{ url_for('main.game') }}" class="link-top link">Game</a> -->
         <div class="profile flex-row">
             {% if current_user.is_authenticated %}
                 <img src="{{ current_user.picture }}">
             {% else %}
-                <div class="auth-btns flex-row">
+                <div class="auth-btns flex-row disabled" title="Currently disabled">
                     <a class="link-top link" href="{{ url_for('auth.login') }}">Login</a>
                     <a class="link-top link" href="{{ url_for('auth.signup') }}">Signup</a>    
                 </div>
