@@ -29,6 +29,7 @@ def create_app():
     
     app.jinja_env.globals['date'] = date.today()
     
+    # Initialize the various flask libraries
     db.init_app(app)
     login_manager.init_app(app)
     socket.init_app(app)
@@ -37,8 +38,8 @@ def create_app():
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint)
+    from .auth import auth_bp
+    app.register_blueprint(auth_bp)
     
     # Add socketIO events
     from . import game
