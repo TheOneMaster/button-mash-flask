@@ -13,7 +13,7 @@ const eventHandlers = {
     let active = 'active-lobby'
 
     for (let room of rooms) {
-      
+
       let class_check = room.classList.contains(active);
 
       if (class_check) room.classList.remove(active);
@@ -79,10 +79,19 @@ socket.on("connect", () => {
 
 });
 
+socket.on("disconnect", () => {
+  console.log("disconnected");
+
+  if (game.gameLoop !== undefined) {
+    game.gameEnd()
+  }
+
+})
+
 socket.on('latency-pong', () => {
   current_time = new Date().getTime();
 
-  ping = (current_time - ping_start)/2;
+  ping = (current_time - ping_start) / 2;
   console.log(ping)
 })
 
@@ -115,7 +124,7 @@ socket.on("client-settings", (json) => {
 });
 
 socket.on('room-update', (clients) => {
-  
+
   let template = document.getElementById('clientMain').content.firstElementChild;
   let client_screen = document.getElementById('lobbyMain');
 
@@ -123,12 +132,12 @@ socket.on('room-update', (clients) => {
   for (let client in clients) {
     let clone = template.cloneNode(true);
     let name = clone.querySelector("h3");
-    
+
     let username = clients[client]
 
     clone.dataset.username = username;
     name.textContent = username;
-    
+
     clientList.push(clone);
   }
 
@@ -139,6 +148,8 @@ socket.on('room-update', (clients) => {
 })
 
 socket.on("lobby-update", (rooms) => {
+
+  /* Create the list of lobbies when a change in the lobby is made */
 
   let template = document.getElementById('roomTemplate').content.firstElementChild;
   let grid = document.getElementById('lobbyGrid');
@@ -247,6 +258,8 @@ const game = {
     game.current_time = undefined;
 
     game.tick = 0;
+
+    game.gameLoop = undefined;
   },
 
   initGame: function () {
