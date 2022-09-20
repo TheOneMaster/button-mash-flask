@@ -22,7 +22,7 @@
             {% if current_user.is_authenticated %}
                 <img src="{{ current_user.picture }}">
             {% else %}
-                <div class="auth-btns flex-row disabled" title="Currently disabled">
+                <div class="auth-btns flex-row" title="Currently disabled">
                     <a class="link-top link" href="{{ url_for('auth.login') }}">Login</a>
                     <a class="link-top link" href="{{ url_for('auth.signup') }}">Signup</a>    
                 </div>
@@ -34,7 +34,7 @@
         {%- block body %}{%- endblock %}
     </div>
     <footer class="flex-col">
-        <p>Made with <img class="footer-pain" src="{{ url_for('static', filename='Images/pain.png') }}"/> by Nayan</p>
+        <p>Made with <img class="footer-pain" src="{{ url_for('static', filename='Images/pain_resized.png') }}"/> by Nayan</p>
         <p>© {{ date.year }} </p>
     </footer>
     {% block modal %}
