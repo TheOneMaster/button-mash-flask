@@ -49,7 +49,7 @@ class Client():
         return f"{self.username} connected at {self.addr}"
     
     @property
-    def username(self):
+    def username(self) -> str:
         return self._username
     
     @username.setter
@@ -159,9 +159,11 @@ class MashGame():
             
     def end_game(self):
         
+        emit('game-end', to=self.room.number)
+            
         json_store_path = "json-store/data-store.jsonl"
         gameID = str(uuid4())
-               
+            
         with jsonlines.open(json_store_path, mode='a', compact=True) as jsonl:
             
             json = {
@@ -175,7 +177,7 @@ class MashGame():
             
             print(f"Game: {gameID} has been written to data storage")
             
-            emit('game-end', to=self.room.number)
+            
             
     def update_score(self, client, score):
         
@@ -205,11 +207,14 @@ class Room():
         self.status = RoomStatus.OPEN
         
         self.clients = []
-        self.score = {}
         
         Room.NUM_MAP[number] = self
         
-        self.start_time = None
+        self.game = None
+    
+    
+    def __len__(self):
+        return len(self.clients)
     
     
     def __generate_number(self, num: int):
