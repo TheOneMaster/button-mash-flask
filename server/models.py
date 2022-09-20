@@ -3,11 +3,14 @@ from datetime import date, datetime
 from flask import url_for
 from flask_login import UserMixin
 
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy import String, Integer, Column, DateTime
+
 from . import db
 
 
 userGames = db.Table('userGames',
-                     db.Column('user_id', db.String, db.ForeignKey('user.id'), primary_key=True),
+                     db.Column('user_id', Integer, db.ForeignKey('users.id'), primary_key=True),
                      db.Column('game_id', db.String, db.ForeignKey('game.id'), primary_key=True),
                      )
 
@@ -23,26 +26,32 @@ class User(db.Model, UserMixin):
     """
     Model for the User Table in the database
     """
-    id = db.Column(db.String, primary_key=True, default=generate_uuid)
-    email = db.Column(db.String, unique=True, nullable=False)
-    username = db.Column(db.String, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    country = db.Column(db.String, nullable=True)
-    picture = db.Column(db.String, nullable=False, default=default_picture)
-    dateCreated = db.Column(db.Date, default=date.today)
+    
+    __tablename__ = 'users'
+    
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True, nullable=False)
+    username = Column(String, nullable=False)
+    password = Column(String, nullable=False)
+    country = Column(String, nullable=True)
+    picture = Column(String, nullable=False, default=default_picture)
+    dateCreated = Column(DateTime, default=datetime.now)
     
 
     participatedGames = db.relationship("Game", secondary=userGames, 
-                                        backref=db.backref('users', lazy=True),
+                                        backref=db.backref('users_', lazy=True),
                                         lazy=True)
+    
+    def __repr__(self) -> str:
+        return f"User(id={self.id}, email={self.email}, username={self.username})"
     
 class Game(db.Model):
     """
     Model for the Game table in the database
     """
-    id = db.Column(db.String, primary_key=True)
-    winner = db.Column(db.String, db.ForeignKey('user.id'), nullable=False)
-    runnerUp = db.Column(db.String, db.ForeignKey('user.id'), nullable=True)
-    dateTime = db.Column(db.DateTime, default=datetime.utcnow)
-
+    id = Column(String, primary_key=True)
+    winner = Column(Integer, db.ForeignKey('users.id'), nullable=True)
+    runnerUp = Column(Integer, db.ForeignKey('users.id'), nullable=True)
+    dateTime = Column(DateTime, default=datetime.now)
     
+    clients = Column(ARRAY(String))

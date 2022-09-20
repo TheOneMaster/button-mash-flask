@@ -1,5 +1,6 @@
-from flask import request, session
+import os
 
+from flask import request, session
 from flask_socketio import emit
 from flask_login import current_user
 
@@ -19,7 +20,7 @@ def setupClient():
         username = generate_username()[0]
         
     sid = request.sid
-    addr = request.remote_addr
+    addr = request.environ.get("CF-Connecting-IP", request.remote_addr)
     
     user = Client(sid, username, addr)   
     session['user'] = user
@@ -67,9 +68,23 @@ def gameReady():
     user = session.get("user")
     user.status = ClientStatus.WAITING
     
+    room = user.room
+    
+    ## Conditions to be reached before starting the game
+    
+    # Minimum 2 players (in prod)
+    
+    debug_env = os.environ.get("DEBUG") == "TRUE"
+    
+    if debug_env:
+        min_players_check = True
+    else:
+        min_players_check = len(room) < 2
+    
+    # all clients are waiting (have pressed the start game button)
     all_users_ready = user.room.checkUsersStatus(ClientStatus.WAITING)
     
-    if all_users_ready:
+    if min_players_check and all_users_ready:
         user.room.playGame()
     else:
         emit('waiting-game')
@@ -85,5 +100,4 @@ def gameTick(tick):
     
     if room.status != RoomStatus.END:
         game = room.game
-        
         game.update_score(user, score)
