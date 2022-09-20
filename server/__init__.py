@@ -1,9 +1,11 @@
 import os
+import logging
 from dotenv import load_dotenv
 
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_socketio import SocketIO
 
 from datetime import date
@@ -13,6 +15,7 @@ load_dotenv()
 socket = SocketIO()
 db = SQLAlchemy()
 login_manager = LoginManager()
+migrate = Migrate()
 
 login_manager.login_view = 'auth.login'
 
@@ -20,7 +23,11 @@ login_manager.login_view = 'auth.login'
 def create_app():
     
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQLITE_URI']
+    
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_DB']
     app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
@@ -31,8 +38,10 @@ def create_app():
     
     # Initialize the various flask libraries
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     socket.init_app(app)
+    
     
     # Add blueprints to the app
     from .main import main as main_blueprint
@@ -50,6 +59,5 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     
-    socket.run(app, debug=True)
+    socket.run(app, debug=True, use_debugger=False)
     # app.run(debug=True)
-
