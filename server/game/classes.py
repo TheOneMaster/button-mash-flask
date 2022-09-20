@@ -46,7 +46,7 @@ class Client():
         self.room.addUser(self)
         
     def __str__(self):
-        return f"{self.username} connected at {self.addr}"
+        return f"{self.username} connected at {self.addr} in room {self.room.number}"
     
     @property
     def username(self) -> str:
@@ -95,6 +95,8 @@ class Client():
         
         self.update()
         self.room.addUser(self)
+        
+        print(f"{self.username} moved to room {self.room.number}")
     
     def delete(self):
         """Delete the User by removing all references to the object.
@@ -250,7 +252,7 @@ class Room():
         leave_room(self.number)
         
         if len(self.clients) == 0:
-            Room.NUM_MAP.pop(self.number)
+            Room.NUM_MAP.pop(self.number, None)
         else:
             self.roomUpdate()
 
@@ -259,7 +261,6 @@ class Room():
     def roomUpdate(self):
         
         msg = {client.sid: client._username for client in self.clients}
-        print(self.number)
         
         emit('room-update', msg, to=self.number)
     

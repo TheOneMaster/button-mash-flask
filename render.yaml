@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: button-mash
+    env: python
+
+    buildCommand: pip install -r requirements.txt && flask db upgrade
+    startCommand: gunicorn --worker-class eventlet -w 1 "server:create_app()"
+
+    envVars:
+      - key: SQL_DB
+        fromDatabase:
+          name: button-mash-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.9.0
+
+databases: 
+  - name: button-mash-db
+    ipAllowList: []
