@@ -1,0 +1,372 @@
+@use "sass:color";
+
+$white: #FFF;
+$black: #000;
+
+
+:root {
+    --theme-color: darkcyan;
+    --title-font: "Rubik", sans-serif;
+    --content-font: "Roboto", sans-serif;
+
+    --background-color: #FFF;
+    
+    --primary-font-color: #{$black};
+    --second-font-color: rgb(32, 32, 32);
+}
+
+
+
+:root[data-theme="dark"] {
+    --background-color: rgb(18, 18, 18);
+    --primary-font-color: #{color.change($white, $alpha: 0.87)};
+    --second-font-color: #{color.change($white, $alpha: 0.6)};
+}
+
+body {
+    margin: 0;
+    font-family: var(--content-font);
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--background-color);
+    color: var(--second-font-color);
+}
+
+@mixin elevation($z_index) {
+    z-index: $z_index;
+    background-color: rgba(#FFF, 0.03+$z_index*0.02);
+}
+
+/* Helper classes */
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.grid {
+    display: grid;
+}
+
+.removed {
+    display: none;
+}
+
+.disabled {
+    cursor: not-allowed;
+
+    a {
+        pointer-events: none;
+        user-select: none;
+        color: rgb(64, 64, 64);
+    }
+}
+
+.is-danger {
+    background-color: hsl(348, 100%, 61%);
+}
+
+/* Top Bar */
+h1, h2 {
+    color: var(--primary-font-color);
+}
+
+.topbar {
+    background-color: var(--theme-color);
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 20px;
+    padding-right: 20px;
+    align-items: center;
+
+    @include elevation(3);
+
+    a {
+        color: var(--primary-font-color);
+        font-family: var(--title-font);
+        text-decoration: none;
+        font-weight: bold;
+        text-decoration: none;
+        font-size: 1.5em;
+        margin-left: 10px;
+    }
+}
+
+.link-main {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0;
+}
+
+
+.profile {
+    height: 100px;
+    margin-left: auto;
+    align-items: center;
+
+    img {
+        max-height: 100%;
+        max-width: 100%;
+        cursor: pointer;
+    }
+}
+
+#topProfile {
+    margin-left: auto;
+}
+
+footer {
+    margin-top: auto;
+    background-color: green;
+    color: white;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    row-gap: 10px;
+    align-items: center;
+    font-family: var(--title-font);
+
+    @include elevation(3);
+
+    p {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.footer-pain {
+    height: 15px;
+    display: inline-block;
+}
+
+/* Container and template classes */
+.container {
+    margin: 20px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+
+.authblock {
+    margin-top: 100px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.authbox {
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    min-width: 300px;
+
+    @include elevation(1);
+}
+
+.input {
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.form-input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.btn {
+    margin: 10px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: var(--theme-color)
+}
+
+.notification {
+    padding: 30px;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    font-weight: bold;
+    background-color: lightgray;
+    color: white;
+}
+
+
+
+.submit-btn {
+    margin: 0px;
+    margin-top: 20px;
+    padding: 10px;
+    width: 100%;
+}
+
+.div-checkbox {
+    margin-top: 15px;
+}
+
+/* Game CSS */
+.game-container {
+    height: 100%;
+}
+
+.game-main {
+    flex-grow: 1;
+    margin-left: 20px;
+    margin-right: 20px;
+    border: 1px black solid;
+    border-radius: 15px;
+    position: relative;
+    transition: 1s;
+
+    @include elevation(1)
+}
+
+.lobby-screen {
+    height: 100%;
+    justify-content: space-around;
+}
+
+.client-screen {
+    justify-content: space-between;
+    padding: 10px;
+    margin: 20px;
+}
+
+
+
+#settingsGear {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 40px;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.game-buttons {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    align-items: center;
+    justify-content: center;
+}
+
+#game-start {
+    border-radius: 50%;
+    height: 150px;
+    width: 150px;
+    border: none;
+    background-color: skyblue;
+    cursor: pointer;
+}
+
+
+.game-settings {
+    max-width: 300px;
+    border-radius: 15px;
+    justify-content: center;
+    border: 1px black solid;
+    padding: 20px;
+    visibility: visible;
+    white-space: nowrap;
+    transition: all 1s;
+
+    @include elevation(1)
+}
+
+.settings-div {
+    align-items: center;
+}
+
+.settings-str {
+    margin-top: 0px;
+}
+
+.settings-input {
+    font-size: 1rem;
+    width: auto;
+}
+
+.room-settings {
+    margin-top: auto;
+    padding-bottom: 50px;
+}
+
+#roomId-str {
+    margin-top: 0px;
+}
+
+.hidden {
+    max-width: 0px;
+    visibility: hidden;
+    opacity: 0;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    overflow: hidden;
+}
+
+
+/* Dialog */
+.lobby-dialog {
+    height: 500px;
+    width: 500px;
+}
+
+.dialog-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.lobby-div {
+    flex-grow: 1;
+    align-content: start;
+    align-self: stretch;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 20px;
+}
+
+
+.lobby-row {
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin: 0 10px;
+}
+
+
+.circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.closed-lobby {
+    background-color: red;
+}
+
+.open-lobby {
+    background-color: greenyellow;
+}
+
+.lobby-row:hover {
+    box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
+}
