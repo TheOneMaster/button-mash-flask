@@ -6,7 +6,8 @@ from uuid import uuid4
 from datetime import datetime
 import jsonlines
 
-from .. import socket
+from .. import socket, db
+from ..models import Game, User
 
 class RoomStatus(Enum):   
     OPEN = 0
@@ -24,7 +25,7 @@ class ClientStatus(Enum):
   
 class Client():
       
-    def __init__(self, sid:str=None, username:str=None, addr:str=None):
+    def __init__(self, id:str=None, sid:str=None, username:str=None, addr:str=None):
         """Create a storage class for a client's data.
 
         Args:
@@ -32,7 +33,7 @@ class Client():
             username (str, optional): The username of the client. Defaults to None.
             addr (str, optional): The remote address of the client. Defaults to None.
         """
-        
+        self.id = id
         self.sid = sid
         self.addr = addr
         self._username = username
@@ -151,8 +152,8 @@ class MashGame():
             # Round to 3 decimal places
             scores = [round(score, 3) for score in scores]
             
+            # Attach usernames to scores being sent
             usernames = [client.username for client in self.room.clients]
-            
             scores = {username: score for username, score in zip(usernames, scores)}
             
             emit('game-score', scores, to=self.room.number)
@@ -162,22 +163,32 @@ class MashGame():
     def end_game(self):
         
         emit('game-end', to=self.room.number)
+        
+        gameID = str(uuid4())        
+        
+        clients = [client.username for client in self.room.clients]
+        
+        final_score = self.ticks[-1]
+        winner = final_score.index(max(final_score))
+        winner = self.room.clients[winner]
+        
+        if winner.id is not None:
+            game = Game(id=gameID, clients=clients, ticks=self.ticks, winner=winner.id)
             
-        json_store_path = "json-store/data-store.jsonl"
-        gameID = str(uuid4())
+        else:
+            game = Game(id=gameID, clients=clients, ticks=self.ticks)
+        
+        for client in self.room.clients:
             
-        with jsonlines.open(json_store_path, mode='a', compact=True) as jsonl:
-            
-            json = {
-                "id": gameID,
-                "datetime": str(datetime.now()),
-                "players": [client.username for client in self.room.clients],
-                "ticks": self.ticks
-            }
-            
-            jsonl.write(json)
-            
-            print(f"Game: {gameID} has been written to data storage")
+            if client.id is not None:
+                user = User.query.filter_by(id=client.id).first()
+                user.participatedGames.append(game)
+        
+        
+        db.session.add(game)
+        db.session.commit()
+        
+        return
             
             
             
