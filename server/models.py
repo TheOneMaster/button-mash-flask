@@ -55,3 +55,7 @@ class Game(db.Model):
     dateTime = Column(DateTime, default=datetime.now)
     
     clients = Column(ARRAY(String))
+    ticks = Column(ARRAY(Integer))
+    
+    def __repr__(self) -> str:
+        return f"Game(id={self.id}, clients={self.clients})"
