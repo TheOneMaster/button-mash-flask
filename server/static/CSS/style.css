@@ -46,7 +46,7 @@ body {
 }
 
 .is-danger {
-  background-color: hsl(348deg, 100%, 61%);
+  background-color: #FF385F;
 }
 
 /* Top Bar */
@@ -289,6 +289,10 @@ footer p {
   overflow: hidden;
 }
 
+.current-user {
+  color: rgba(100, 150, 255, 0.8);
+}
+
 /* Dialog */
 .lobby-dialog {
   height: 500px;
@@ -352,6 +356,7 @@ footer p {
   }
   footer {
     background-color: green;
+    color: white;
   }
   .game-settings, .game-main, .authbox {
     background-color: initial;
@@ -366,6 +371,9 @@ footer p {
   .notification.is-danger {
     background-color: #FF385F;
     color: white;
+  }
+  .current-user {
+    color: rgb(100, 150, 255);
   }
 }
 

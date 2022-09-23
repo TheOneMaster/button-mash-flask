@@ -2,6 +2,11 @@
 
 // Default dark mode CSS
 
+$danger: #FF385F;
+
+
+$current_user: rgb(100, 150, 255);
+
 :root {
     --theme-color: darkcyan;
     --title-font: "Rubik", sans-serif;
@@ -61,7 +66,7 @@ body {
 }
 
 .is-danger {
-    background-color: hsl(348, 100%, 61%);
+    background-color: $danger;
 }
 
 /* Top Bar */
@@ -197,7 +202,7 @@ footer {
     }
 
     &.is-danger {
-        color: rgba(#FF385F, 0.8);
+        color: rgba($danger, 0.8);
     }
 }
 
@@ -317,6 +322,9 @@ footer {
     overflow: hidden;
 }
 
+.current-user {
+    color: rgba($current_user, 0.8)
+}
 
 /* Dialog */
 .lobby-dialog {
@@ -392,6 +400,7 @@ footer {
 
     footer {
         background-color: green;
+        color: white;
     }
 
     .game-settings, .game-main, .authbox {
@@ -399,7 +408,6 @@ footer {
     }
 
     .notification {
-
         background-color: darkgray;
         color: white;
 
@@ -408,10 +416,13 @@ footer {
         }
 
         &.is-danger {
-            background-color: #FF385F;
+            background-color: $danger;
             color: white;
         }
         
     }
 
+    .current-user {
+        color: $current_user;
+    }
 }
