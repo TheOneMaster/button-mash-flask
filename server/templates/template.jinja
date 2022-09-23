@@ -23,7 +23,7 @@
             {% if current_user.is_authenticated %}
                 <img src="{{ current_user.picture }}">
             {% else %}
-                <div class="auth-btns flex-row" title="Currently disabled">
+                <div class="auth-btns flex-row">
                     <a class="link-top link" href="{{ url_for('auth.login') }}">Login</a>
                     <a class="link-top link" href="{{ url_for('auth.signup') }}">Signup</a>    
                 </div>
