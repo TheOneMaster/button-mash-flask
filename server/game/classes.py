@@ -40,7 +40,7 @@ class Client():
         
         self.status = ClientStatus.READY
         
-        self.room = Room.getOpenRoom()
+        self.room = Room.getOpenRoom(id)
         
         self.update()
         
@@ -48,6 +48,16 @@ class Client():
         
     def __str__(self):
         return f"{self.username} connected at {self.addr} in room {self.room.number}"
+    
+    
+    def __eq__(self, __o: object) -> bool:
+        
+        if isinstance(__o, Client):
+            if __o.id is not None:
+                return __o.id == self.id
+            
+        return False
+    
     
     @property
     def username(self) -> str:
@@ -244,6 +254,10 @@ class Room():
     def addUser(self, user):
         
         if self.status == RoomStatus.OPEN:
+            
+            if any(user==client for client in self.clients):
+                raise ValueError("User is already in room")
+            
             self.clients.append(user)
             
             if len(self.clients) == 4:
@@ -319,15 +333,20 @@ class Room():
         emit('lobby-update', msg, broadcast=True)
 
     @staticmethod
-    def getOpenRoom():
+    def getOpenRoom(client_id=None):
         """ Return an open room for a user to join."""
         
         # Find if open rooms exist
         for room in Room.NUM_MAP.values():
             if room.status == RoomStatus.OPEN:
+                
+                # Check that client is not already in room                
+                if client_id is not None and any(client_id == client.id for client in room.clients):
+                    continue
+                
                 return room
         
-        # Create a new room  
+        # Else create a new room  
         open_room = Room()
         
         return open_room            
