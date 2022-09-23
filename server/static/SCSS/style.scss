@@ -117,18 +117,38 @@ footer {
     margin-top: auto;
     padding-top: 10px;
     padding-bottom: 10px;
-    row-gap: 10px;
-    align-items: center;
 
     color: var(--primary-font-color);
     font-family: var(--title-font);
 
+    position: relative;
+
     @include elevation(3);
+    
+
+    .footer-credit {
+        row-gap: 10px;
+        align-items: center;
+    }
 
     p {
         margin: 0;
         padding: 0;
     }
+
+    .footer-links {
+        position: absolute;
+        right: 30px;
+        top: 50%;
+        column-gap: 15px;
+
+        transform: translateY(-50%);
+
+        svg {
+            height: 30px;
+        }
+    }
+
 }
 
 .footer-pain {
@@ -217,6 +237,13 @@ footer {
 /* Game CSS */
 .game-container {
     height: 100%;
+
+
+
+
+
+
+
 }
 
 .game-main {
@@ -242,6 +269,20 @@ footer {
     margin: 20px;
 }
 
+.ping-div {
+    margin: 10px;
+    position: absolute;
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+
+    p {
+        margin: 0;
+    }
+
+    span {
+        color: rgba(100, 255, 150, 0.8);
+    }
+}
 
 
 #settingsGear {
@@ -260,15 +301,34 @@ footer {
     transform: translate(-50%, -50%);
     align-items: center;
     justify-content: center;
-}
 
-#game-start {
-    border-radius: 50%;
-    height: 150px;
-    width: 150px;
-    border: none;
-    background-color: skyblue;
-    cursor: pointer;
+    #game-start {
+        border-radius: 50%;
+        height: 150px;
+        width: 150px;
+        border: none;
+        background-color: skyblue;
+        cursor: pointer;
+    }
+
+    #game-waiting::after {
+        content: "i";
+        margin-left: 0px;
+        animation: blink 1s infinite;
+        display: inline;
+        background: white;
+        font-size: 20px;
+    }
+      
+    @keyframes blink {
+    from {
+        opacity: 1;
+    }
+    
+    to {
+        opacity: 0;
+    }
+    }
 }
 
 
