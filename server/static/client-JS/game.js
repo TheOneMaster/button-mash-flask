@@ -128,6 +128,9 @@ socket.on('room-update', (clients) => {
   let template = document.getElementById('clientMain').content.firstElementChild;
   let client_screen = document.getElementById('lobbyMain');
 
+  let curUserEl = document.getElementById('username-str');
+  let curUser = curUserEl.dataset.str;
+
   let clientList = []
   for (let client in clients) {
     let clone = template.cloneNode(true);
@@ -136,8 +139,14 @@ socket.on('room-update', (clients) => {
     let username = clients[client]
 
     clone.dataset.username = username;
-    name.textContent = username;
 
+    if (username === curUser) {
+      name.textContent = `${username} - (You)`
+      name.classList.add("current-user");
+    } else{
+      name.textContent = username;
+    }
+    
     clientList.push(clone);
   }
 
@@ -184,7 +193,6 @@ socket.on("lobby-update", (rooms) => {
 });
 
 // Game events
-
 socket.on("start-game", (settings) => {
   console.log("Starting game");
 
