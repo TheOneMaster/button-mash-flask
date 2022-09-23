@@ -1,11 +1,15 @@
+from urllib.request import urlopen
+import json
+
 from flask import Blueprint, render_template, redirect, request, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user
 
+from .helper import no_login
 from .. import db, login_manager
 from ..models import User
 
-from .helper import no_login
+
 
 auth = Blueprint("auth", __name__)
 
@@ -39,11 +43,15 @@ def signup_post():
         return redirect(url_for('auth.signup'))
     
     password = generate_password_hash(form['password'], method="sha256")
-    # ip = request.remote_addr
-    # response = urlopen(f"https://ipinfo.io/{ip}/json")
-    # data = json.load(response)
-        
-    newUser = User(email=form['email'], username=form['username'], password=password, country='test')
+    
+    # Get country of user
+    ip = request.environ.get("HTTP_TRUE_CLIENT_IP", request.remote_addr)
+    response = urlopen(f"https://ipinfo.io/{ip}/json")
+    data = json.load(response)
+    
+    country = data['country']
+    
+    newUser = User(email=form['email'], username=form['username'], password=password, country=country)
     
     db.session.add(newUser)
     db.session.commit()

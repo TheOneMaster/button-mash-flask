@@ -6,7 +6,8 @@ from uuid import uuid4
 from datetime import datetime
 import jsonlines
 
-from .. import socket
+from .. import socket, db
+from ..models import Game, User
 
 class RoomStatus(Enum):   
     OPEN = 0
@@ -24,7 +25,7 @@ class ClientStatus(Enum):
   
 class Client():
       
-    def __init__(self, sid:str=None, username:str=None, addr:str=None):
+    def __init__(self, id:str=None, sid:str=None, username:str=None, addr:str=None):
         """Create a storage class for a client's data.
 
         Args:
@@ -32,7 +33,7 @@ class Client():
             username (str, optional): The username of the client. Defaults to None.
             addr (str, optional): The remote address of the client. Defaults to None.
         """
-        
+        self.id = id
         self.sid = sid
         self.addr = addr
         self._username = username
@@ -99,7 +100,7 @@ class Client():
                 new_room.addUser(self)
                 
             except ValueError as error:
-                emit('error', str(error))
+                emit(error.message)
         
         self.room = new_room
         
@@ -161,8 +162,8 @@ class MashGame():
             # Round to 3 decimal places
             scores = [round(score, 3) for score in scores]
             
+            # Attach usernames to scores being sent
             usernames = [client.username for client in self.room.clients]
-            
             scores = {username: score for username, score in zip(usernames, scores)}
             
             emit('game-score', scores, to=self.room.number)
@@ -172,23 +173,36 @@ class MashGame():
     def end_game(self):
         
         emit('game-end', to=self.room.number)
+        
+        gameID = str(uuid4())        
+        
+        clients = [client.username for client in self.room.clients]
+        
+        # Get winner and runner up
+        
+        final_score = self.ticks[-1]
+        scores_sorted = sorted(final_score, reverse=True)                       # Sort scores in descending order to find top placers
+        sorted_index = [final_score.index(score) for score in scores_sorted]    # Index for the scores sorted in descending order
+        podium_clients = [self.room.clients[i] for i in sorted_index][:2]       # Client objects for the top 2 placing clients
+        
+        podium = {
+            'winner': podium_clients[0].id,
+            'runnerUp': podium_clients[1].id
+        }
+        
+        # Create new game object from game data
+        game = Game(id=gameID, clients=clients, ticks=self.ticks, **podium)
+        
+        for client in self.room.clients:
+        # Add game to participatedGames for any user that is in the DB
             
-        json_store_path = "json-store/data-store.jsonl"
-        gameID = str(uuid4())
-            
-        with jsonlines.open(json_store_path, mode='a', compact=True) as jsonl:
-            
-            json = {
-                "id": gameID,
-                "datetime": str(datetime.now()),
-                "players": [client.username for client in self.room.clients],
-                "ticks": self.ticks
-            }
-            
-            jsonl.write(json)
-            
-            print(f"Game: {gameID} has been written to data storage")
-            
+            if client.id is not None:
+                user = User.query.filter_by(id=client.id).first()
+                user.participatedGames.append(game)
+        
+        
+        db.session.add(game)
+        db.session.commit()
             
             
     def update_score(self, client, score):

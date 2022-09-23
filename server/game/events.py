@@ -8,21 +8,25 @@ from random_username.generate import generate_username
 
 from .classes import Client, ClientStatus, RoomStatus
 from .. import socket
+from ..models import Game
 
 
 @socket.on('connect')
 def setupClient():
     
     username = None
+    id=None
+    
     if current_user.is_authenticated:
         username = current_user.username
+        id = current_user.id
     else:
         username = generate_username()[0]
         
     sid = request.sid
-    addr = request.environ.get("CF-Connecting-IP", request.remote_addr)
+    addr = request.environ.get("HTTP_TRUE_CLIENT_IP", request.remote_addr)
     
-    user = Client(sid, username, addr)   
+    user = Client(id, sid, username, addr)   
     session['user'] = user
     
     print(user)

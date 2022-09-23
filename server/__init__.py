@@ -1,5 +1,5 @@
 import os
-import logging
+
 from dotenv import load_dotenv
 
 from flask import Flask
@@ -23,9 +23,6 @@ login_manager.login_view = 'auth.login'
 def create_app():
     
     app = Flask(__name__)
-    
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
     
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQL_DB']
     app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
@@ -59,5 +56,5 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     
-    socket.run(app, debug=True, use_debugger=False)
+    socket.run(app, debug=True)
     # app.run(debug=True)
