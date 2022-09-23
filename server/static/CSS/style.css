@@ -2,12 +2,6 @@
   --theme-color: darkcyan;
   --title-font: "Rubik", sans-serif;
   --content-font: "Roboto", sans-serif;
-  --background-color: #FFF;
-  --primary-font-color: #000;
-  --second-font-color: rgb(32, 32, 32);
-}
-
-:root[data-theme=dark] {
   --background-color: rgb(18, 18, 18);
   --primary-font-color: rgba(255, 255, 255, 0.87);
   --second-font-color: rgba(255, 255, 255, 0.6);
@@ -103,12 +97,11 @@ h1, h2 {
 
 footer {
   margin-top: auto;
-  background-color: green;
-  color: white;
   padding-top: 10px;
   padding-bottom: 10px;
   row-gap: 10px;
   align-items: center;
+  color: var(--primary-font-color);
   font-family: var(--title-font);
   z-index: 3;
   background-color: rgba(255, 255, 255, 0.09);
@@ -174,8 +167,15 @@ footer p {
   box-sizing: border-box;
   border-radius: 10px;
   font-weight: bold;
-  background-color: lightgray;
-  color: white;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.07);
+}
+.notification a {
+  color: rgba(128, 159, 255, 0.8);
+}
+.notification.is-danger {
+  color: rgba(255, 56, 95, 0.8);
 }
 
 .submit-btn {
@@ -336,6 +336,37 @@ footer p {
 
 .lobby-row:hover {
   box-shadow: 0px 0px 5px 4px rgb(97, 169, 224);
+}
+
+@media screen and (prefers-color-scheme: light) {
+  :root {
+    --background-color: white;
+    --primary-font-color: black;
+    --second-font-color: rgb(32, 32, 32);
+  }
+  .topbar {
+    background-color: var(--theme-color);
+  }
+  .topbar a {
+    color: white;
+  }
+  footer {
+    background-color: green;
+  }
+  .game-settings, .game-main, .authbox {
+    background-color: initial;
+  }
+  .notification {
+    background-color: darkgray;
+    color: white;
+  }
+  .notification a {
+    color: rgb(128, 159, 255);
+  }
+  .notification.is-danger {
+    background-color: #FF385F;
+    color: white;
+  }
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -1,26 +1,15 @@
 @use "sass:color";
 
-$white: #FFF;
-$black: #000;
-
+// Default dark mode CSS
 
 :root {
     --theme-color: darkcyan;
     --title-font: "Rubik", sans-serif;
     --content-font: "Roboto", sans-serif;
 
-    --background-color: #FFF;
-    
-    --primary-font-color: #{$black};
-    --second-font-color: rgb(32, 32, 32);
-}
-
-
-
-:root[data-theme="dark"] {
     --background-color: rgb(18, 18, 18);
-    --primary-font-color: #{color.change($white, $alpha: 0.87)};
-    --second-font-color: #{color.change($white, $alpha: 0.6)};
+    --primary-font-color: #{color.change(white, $alpha: 0.87)};
+    --second-font-color: #{color.change(white, $alpha: 0.6)};
 }
 
 body {
@@ -35,9 +24,11 @@ body {
     color: var(--second-font-color);
 }
 
+// Mixins
+
 @mixin elevation($z_index) {
     z-index: $z_index;
-    background-color: rgba(#FFF, 0.03+$z_index*0.02);
+    background-color: rgba(white, 0.03+$z_index*0.02);
 }
 
 /* Helper classes */
@@ -124,12 +115,12 @@ h1, h2 {
 
 footer {
     margin-top: auto;
-    background-color: green;
-    color: white;
     padding-top: 10px;
     padding-bottom: 10px;
     row-gap: 10px;
     align-items: center;
+
+    color: var(--primary-font-color);
     font-family: var(--title-font);
 
     @include elevation(3);
@@ -197,8 +188,17 @@ footer {
     box-sizing: border-box;
     border-radius: 10px;
     font-weight: bold;
-    background-color: lightgray;
-    color: white;
+    color: rgba(white, 0.8);
+
+    @include elevation(2);
+
+    a {
+        color: rgba(128,159,255, 0.8);
+    }
+
+    &.is-danger {
+        color: rgba(#FF385F, 0.8);
+    }
 }
 
 
@@ -369,4 +369,49 @@ footer {
 
 .lobby-row:hover {
     box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
+}
+
+
+// Light mode customization
+@media screen and (prefers-color-scheme: light) {
+    
+    :root {
+        --background-color: white;
+    
+        --primary-font-color: black;
+        --second-font-color: rgb(32, 32, 32);
+    }
+
+    .topbar {
+        background-color: var(--theme-color);
+
+        a {
+            color: white;
+        }
+    }
+
+    footer {
+        background-color: green;
+    }
+
+    .game-settings, .game-main, .authbox {
+        background-color: initial;
+    }
+
+    .notification {
+
+        background-color: darkgray;
+        color: white;
+
+        a {
+            color: rgb(128,159,255);
+        }
+
+        &.is-danger {
+            background-color: #FF385F;
+            color: white;
+        }
+        
+    }
+
 }
