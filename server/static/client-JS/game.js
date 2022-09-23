@@ -150,7 +150,7 @@ socket.on('room-update', (clients) => {
     clone.dataset.username = username;
 
     if (username === curUser) {
-      name.textContent = `${username} - (You)`
+      name.textContent = `${username} (You)`
       name.classList.add("current-user");
     } else{
       name.textContent = username;
