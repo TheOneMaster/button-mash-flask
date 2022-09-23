@@ -90,7 +90,7 @@ class Client():
                 new_room.addUser(self)
                 
             except ValueError as error:
-                emit('error', str(error))
+                emit(error.message)
         
         self.room = new_room
         
@@ -168,17 +168,23 @@ class MashGame():
         
         clients = [client.username for client in self.room.clients]
         
-        final_score = self.ticks[-1]
-        winner = final_score.index(max(final_score))
-        winner = self.room.clients[winner]
+        # Get winner and runner up
         
-        if winner.id is not None:
-            game = Game(id=gameID, clients=clients, ticks=self.ticks, winner=winner.id)
-            
-        else:
-            game = Game(id=gameID, clients=clients, ticks=self.ticks)
+        final_score = self.ticks[-1]
+        scores_sorted = sorted(final_score, reverse=True)                       # Sort scores in descending order to find top placers
+        sorted_index = [final_score.index(score) for score in scores_sorted]    # Index for the scores sorted in descending order
+        podium_clients = [self.room.clients[i] for i in sorted_index][:2]       # Client objects for the top 2 placing clients
+        
+        podium = {
+            'winner': podium_clients[0].id,
+            'runnerUp': podium_clients[1].id
+        }
+        
+        # Create new game object from game data
+        game = Game(id=gameID, clients=clients, ticks=self.ticks, **podium)
         
         for client in self.room.clients:
+        # Add game to participatedGames for any user that is in the DB
             
             if client.id is not None:
                 user = User.query.filter_by(id=client.id).first()
@@ -187,9 +193,6 @@ class MashGame():
         
         db.session.add(game)
         db.session.commit()
-        
-        return
-            
             
             
     def update_score(self, client, score):
