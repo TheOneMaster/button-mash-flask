@@ -1,4 +1,5 @@
 // JS for the HTML
+"use strict"
 
 const eventHandlers = {
   settingsToggle: function () {
@@ -65,8 +66,9 @@ function startGame() {
 }
 
 let ping = undefined;
-let ping_start = undefined
-let ping_loop = undefined
+let ping_start = undefined;
+let ping_loop = undefined;
+let pingEl = undefined;
 
 function sendPing() {
   ping_start = new Date().getTime();
@@ -75,8 +77,8 @@ function sendPing() {
 
 
 socket.on("connect", () => {
-  ping_loop = setInterval(sendPing, 5000);
-
+  ping_loop = setInterval(sendPing, 3000);
+  sendPing();
 });
 
 socket.on("disconnect", () => {
@@ -89,9 +91,16 @@ socket.on("disconnect", () => {
 })
 
 socket.on('latency-pong', () => {
-  current_time = new Date().getTime();
+  let current_time = new Date().getTime();
 
   ping = (current_time - ping_start) / 2;
+
+  if (pingEl === undefined) {
+    pingEl = document.getElementById('pingOutput');
+  }
+
+  pingEl.textContent = ping;
+
   console.log(ping)
 })
 
