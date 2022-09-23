@@ -79,6 +79,8 @@ h1, h2 {
     padding-right: 20px;
     align-items: center;
 
+    min-height: 100px;
+
     @include elevation(3);
 
     a {
@@ -100,7 +102,7 @@ h1, h2 {
 
 
 .profile {
-    height: 100px;
+    height: 70px;
     margin-left: auto;
     align-items: center;
 
@@ -148,6 +150,14 @@ footer {
         svg {
             height: 30px;
         }
+    }
+
+    #link-github {
+        fill: white;
+    }
+
+    #link-twitter {
+        fill: rgb(29, 161, 242);
     }
 
 }
@@ -450,6 +460,11 @@ footer {
 
     footer {
         background-color: green;
+        color:white;
+
+        #link-github {
+            fill: black;
+        }
     }
 
     .game-settings, .game-main, .authbox {

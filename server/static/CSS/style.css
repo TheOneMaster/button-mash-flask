@@ -61,6 +61,7 @@ h1, h2 {
   padding-left: 20px;
   padding-right: 20px;
   align-items: center;
+  min-height: 100px;
   z-index: 3;
   background-color: rgba(255, 255, 255, 0.09);
 }
@@ -81,7 +82,7 @@ h1, h2 {
 }
 
 .profile {
-  height: 100px;
+  height: 70px;
   margin-left: auto;
   align-items: center;
 }
@@ -122,6 +123,12 @@ footer .footer-links {
 }
 footer .footer-links svg {
   height: 30px;
+}
+footer #link-github {
+  fill: white;
+}
+footer #link-twitter {
+  fill: rgb(29, 161, 242);
 }
 
 .footer-pain {
@@ -397,6 +404,10 @@ footer .footer-links svg {
   }
   footer {
     background-color: green;
+    color: white;
+  }
+  footer #link-github {
+    fill: black;
   }
   .game-settings, .game-main, .authbox {
     background-color: initial;
