@@ -34,7 +34,16 @@ body {
 }
 
 .disabled {
-    cursor: not-allowed;
+  cursor: not-allowed;
+}
+.disabled a {
+  pointer-events: none;
+  user-select: none;
+  color: rgb(64, 64, 64);
+}
+
+.is-danger {
+  background-color: #FF385F;
 }
 
 /* Top Bar */
@@ -276,6 +285,9 @@ footer p {
     overflow: hidden;
 }
 
+.current-user {
+  color: rgba(100, 150, 255, 0.8);
+}
 
 /* Dialog */
 .lobby-dialog {
@@ -329,8 +341,39 @@ footer p {
     box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
 }
 
-.active-lobby {
-
-    
-
+@media screen and (prefers-color-scheme: light) {
+  :root {
+    --background-color: white;
+    --primary-font-color: black;
+    --second-font-color: rgb(32, 32, 32);
+  }
+  .topbar {
+    background-color: var(--theme-color);
+  }
+  .topbar a {
+    color: white;
+  }
+  footer {
+    background-color: green;
+    color: white;
+  }
+  .game-settings, .game-main, .authbox {
+    background-color: initial;
+  }
+  .notification {
+    background-color: darkgray;
+    color: white;
+  }
+  .notification a {
+    color: rgb(128, 159, 255);
+  }
+  .notification.is-danger {
+    background-color: #FF385F;
+    color: white;
+  }
+  .current-user {
+    color: rgb(100, 150, 255);
+  }
 }
+
+/*# sourceMappingURL=style.css.map */
