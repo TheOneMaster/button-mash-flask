@@ -1,6 +1,8 @@
 @use "sass:color";
 
 // Default dark mode CSS
+$danger: rgb(255, 56, 96);
+$current_user: rgb(100, 150, 255);
 
 :root {
     --theme-color: darkcyan;
@@ -8,8 +10,8 @@
     --content-font: "Roboto", sans-serif;
 
     --background-color: rgb(18, 18, 18);
-    --primary-font-color: #{color.change(white, $alpha: 0.87)};
-    --second-font-color: #{color.change(white, $alpha: 0.6)};
+    --primary-font-color: rgba(255, 255, 255, 0.87);
+    --second-font-color: rgba(255, 255, 255, 0.6);
 }
 
 body {
@@ -61,7 +63,7 @@ body {
 }
 
 .is-danger {
-    background-color: hsl(348, 100%, 61%);
+    background-color: $danger;
 }
 
 /* Top Bar */
@@ -124,7 +126,6 @@ footer {
     position: relative;
 
     @include elevation(3);
-    
 
     .footer-credit {
         row-gap: 10px;
@@ -217,7 +218,7 @@ footer {
     }
 
     &.is-danger {
-        color: rgba(#FF385F, 0.8);
+        color: rgba($danger, 0.8);
     }
 }
 
@@ -237,13 +238,6 @@ footer {
 /* Game CSS */
 .game-container {
     height: 100%;
-
-
-
-
-
-
-
 }
 
 .game-main {
@@ -255,7 +249,11 @@ footer {
     position: relative;
     transition: 1s;
 
-    @include elevation(1)
+    @include elevation(1);
+}
+
+.current-user {
+    color: rgba($current_user, 0.8);
 }
 
 .lobby-screen {
@@ -456,6 +454,14 @@ footer {
 
     .game-settings, .game-main, .authbox {
         background-color: initial;
+    }
+
+    .current-user {
+        color: $current_user;
+    }
+
+    .ping-div span {
+        color:indianred;
     }
 
     .notification {
