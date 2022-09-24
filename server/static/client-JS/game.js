@@ -11,7 +11,7 @@ const eventHandlers = {
     let lobby = document.getElementById('lobbyGrid');
     let rooms = lobby.childNodes;
 
-    let active = 'active-lobby'
+    let active = 'active-lobby';
 
     for (let room of rooms) {
 
@@ -23,12 +23,21 @@ const eventHandlers = {
     this.classList.add(active)
   },
 
+  profileOptions: function() {
+    let dropdownEl = document.getElementById('profileOptions');
+    dropdownEl.classList.toggle('removed');
+  }
 };
 
 function addEventHandlers() {
-  let settings_gear = document.getElementById("settingsGear");
 
+  // Settings wheel click listener
+  let settings_gear = document.getElementById("settingsGear");
   settings_gear.addEventListener("click", eventHandlers.settingsToggle);
+
+  // Profile picture toggle options
+  let profile_image = document.getElementById('profileImage');
+  profile_image.addEventListener('click', eventHandlers.profileOptions);
 }
 
 // Socket IO stuff
@@ -85,8 +94,10 @@ socket.on("disconnect", () => {
   console.log("disconnected");
 
   if (game.gameLoop !== undefined) {
-    game.gameEnd()
+    game.gameEnd();
   }
+
+  pingEl.textContent = "disconnected";
 
 })
 
@@ -100,8 +111,6 @@ socket.on('latency-pong', () => {
   }
 
   pingEl.textContent = ping;
-
-  console.log(ping)
 })
 
 
@@ -152,10 +161,10 @@ socket.on('room-update', (clients) => {
     if (username === curUser) {
       name.textContent = `${username} (You)`
       name.classList.add("current-user");
-    } else{
+    } else {
       name.textContent = username;
     }
-    
+
     clientList.push(clone);
   }
 
