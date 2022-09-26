@@ -22,11 +22,6 @@ const eventHandlers = {
 
     this.classList.add(active)
   },
-
-  profileOptions: function() {
-    let dropdownEl = document.getElementById('profileOptions');
-    dropdownEl.classList.toggle('removed');
-  }
 };
 
 function addEventHandlers() {
@@ -34,10 +29,6 @@ function addEventHandlers() {
   // Settings wheel click listener
   let settings_gear = document.getElementById("settingsGear");
   settings_gear.addEventListener("click", eventHandlers.settingsToggle);
-
-  // Profile picture toggle options
-  let profile_image = document.getElementById('profileImage');
-  profile_image.addEventListener('click', eventHandlers.profileOptions);
 }
 
 // Socket IO stuff
