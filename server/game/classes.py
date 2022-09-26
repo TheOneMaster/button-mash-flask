@@ -2,12 +2,8 @@ from flask_socketio import emit, leave_room, join_room
 
 from enum import Enum
 from random import randint
-from uuid import uuid4
-from datetime import datetime
-import jsonlines
 
-from .. import socket, db
-from ..models import Game, User
+from .types import TimeGame
 
 class RoomStatus(Enum):   
     OPEN = 0
@@ -49,6 +45,8 @@ class Client():
     def __str__(self):
         return f"{self.username} connected at {self.addr} in room {self.room.number}"
     
+    def __repr__(self) -> str:
+        return f"Client(id={self.id}, username=${self.username}, address={self.addr})"
     
     def __eq__(self, __o: object) -> bool:
         
@@ -114,104 +112,6 @@ class Client():
         """        
         self.room.removeUser(self)
 
-
-class MashGame():
-    
-    def __init__(self, room, time=10, freq=30) -> None:
-        
-        self.gameTime = time
-        self.freq = freq
-        self.room = room
-        
-        self.tickTime = 1/freq
-        self.totalTicks = freq * time
-        self.ticks = [None] * self.totalTicks
-        
-        self.startTime = None
-        self._cur_score = None
-        
-    def start_game(self):
-        self.startTime = datetime.now()
-        self._cur_score = [0 for i in self.room.clients]
-        
-        msg = {
-            "freq": self.freq,
-            "time": self.gameTime
-        }
-        
-        emit("start-game", msg, to=self.room.number)
-        
-        # Run game
-        self.game_loop()
-                   
-    def game_loop(self):
-        
-        for i in range(self.totalTicks):
-            
-            total_score = self._cur_score.copy()
-            self.ticks[i] = total_score
-            
-            cur_time = datetime.now()
-            
-            # Use time delta from start to now to calculate score (clicks per second)
-            delta = cur_time - self.startTime
-            delta_sec = delta.total_seconds()
-            
-            scores = [score/delta_sec for score in total_score]
-            
-            # Round to 3 decimal places
-            scores = [round(score, 3) for score in scores]
-            
-            # Attach usernames to scores being sent
-            usernames = [client.username for client in self.room.clients]
-            scores = {username: score for username, score in zip(usernames, scores)}
-            
-            emit('game-score', scores, to=self.room.number)
-            
-            socket.sleep(self.tickTime)
-            
-    def end_game(self):
-        
-        emit('game-end', to=self.room.number)
-        
-        gameID = str(uuid4())        
-        
-        clients = [client.username for client in self.room.clients]
-        
-        # Get winner and runner up
-        
-        final_score = self.ticks[-1]
-        scores_sorted = sorted(final_score, reverse=True)                       # Sort scores in descending order to find top placers
-        sorted_index = [final_score.index(score) for score in scores_sorted]    # Index for the scores sorted in descending order
-        podium_clients = [self.room.clients[i] for i in sorted_index][:2]       # Client objects for the top 2 placing clients
-        
-        podium = {
-            'winner': podium_clients[0].id,
-            'runnerUp': podium_clients[1].id
-        }
-        
-        # Create new game object from game data
-        game = Game(id=gameID, clients=clients, ticks=self.ticks, **podium)
-        
-        for client in self.room.clients:
-        # Add game to participatedGames for any user that is in the DB
-            
-            if client.id is not None:
-                user = User.query.filter_by(id=client.id).first()
-                user.participatedGames.append(game)
-        
-        
-        db.session.add(game)
-        db.session.commit()
-            
-            
-    def update_score(self, client, score):
-        
-        index = self.room.clients.index(client)
-        
-        self._cur_score[index] = score
-        
-
 class Room():
     
     NUM_MAP = {}
@@ -252,7 +152,6 @@ class Room():
     
             
     def addUser(self, user):
-        
         if self.status == RoomStatus.OPEN:
             
             if any(user==client for client in self.clients):
@@ -274,7 +173,7 @@ class Room():
         
         self.clients.remove(user)
         
-        if self.status == RoomStatus.CLOSED:
+        if self.status != RoomStatus.OPEN:
             self.status = RoomStatus.OPEN
             
         leave_room(self.number)
@@ -287,6 +186,8 @@ class Room():
         Room.lobbyUpdate()
 
     def roomUpdate(self):
+        """Send room data to each client in the room.
+        """
         
         msg = {client.sid: client._username for client in self.clients}
         
@@ -313,7 +214,7 @@ class Room():
         for client in self.clients:
             client.status = ClientStatus.ACTIVE
             
-        self.game = MashGame(self, time=5)
+        self.game = TimeGame(self, time=5)
         self.game.start_game()
         
         self.status = RoomStatus.END
@@ -339,7 +240,7 @@ class Room():
         # Find if open rooms exist
         for room in Room.NUM_MAP.values():
             if room.status == RoomStatus.OPEN:
-                
+    
                 # Check that client is not already in room                
                 if client_id is not None and any(client_id == client.id for client in room.clients):
                     continue
