@@ -241,14 +241,37 @@ socket.on("waiting-game", () => {
 socket.on("game-score", (score) => {
   let gameLobby = document.getElementById('lobbyMain');
 
+  let scores = Object.values(score);
+  let max_score = Math.max(...scores)
+
   for (let username in score) {
     let userDiv = gameLobby.querySelector(`[data-username="${username}"]`);
     let output = userDiv.querySelector('output');
+    let score_bar = userDiv.querySelector('.score-bar');
+
+    let cur_score = score[username];
+
+    if (cur_score === max_score) {
+      score_bar.classList.add('score-winner');
+    } else if (score_bar.classList.contains('score-winner')) {
+      score_bar.classList.remove('score-winner');
+    }
+
+    let cur_height_ratio = (cur_score/20);    // Goddamn, imagine having more than 20 cps
+    let cur_height = cur_height_ratio * 600
+
+    if (cur_height_ratio >= 1) {
+      score_bar.classList.add('score-damn');
+    } else if (score_bar.classList.contains('score-damn') && cur_height_ratio < 1) {
+      score_bar.classList.remove('score-damn');
+    }
+
+    score_bar.style.height = `${cur_height}px`;
 
     output.textContent = score[username];
   }
 
-  console.log(score)
+  console.log(score);
 });
 
 socket.on('game-end', () => {
@@ -269,7 +292,7 @@ const game = {
   freq: 30,
   tick: 0,
 
-  gameLoop: undefined,
+  gameInterval: undefined,
 
   updateSettings(freq, time) {
     this.freq = freq;
@@ -285,7 +308,7 @@ const game = {
 
     game.tick = 0;
 
-    game.gameLoop = undefined;
+    game.gameInterval = undefined;
   },
 
   initGame: function () {
@@ -293,7 +316,7 @@ const game = {
 
     game.start_time = new Date().getTime();
 
-    game.gameLoop = setInterval(game.gameLoop, 1000 / game.freq);
+    game.gameInterval = setInterval(game.gameLoop, 1000 / game.freq);
     // setTimeout(() => game.gameEnd(gameloop), 1000 * game.maxTime);
   },
 
@@ -316,7 +339,7 @@ const game = {
   },
 
   gameEnd: function () {
-    clearInterval(game.gameLoop);
+    clearInterval(game.gameInterval);
     socket.emit("game-end");
     game.resetGame();
 

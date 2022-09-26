@@ -7,6 +7,11 @@ $dropdown_color: #272727;
 
 $theme-color: darkcyan;
 
+
+$score_bar_color: blue;
+$score_bar_win_col: green;
+$score_bar_damn_col: darkorange;
+
 :root {
     --theme-color: #{$theme-color};
     --title-font: "Rubik", sans-serif;
@@ -115,7 +120,7 @@ $dropdown_item_border: rgba(white, 0.5);
     margin-left: auto;
     align-items: center;
 
-    img {
+    #profileImage {
         max-height: 100%;
         max-width: 100%;
         cursor: pointer;
@@ -342,10 +347,31 @@ footer {
 }
 
 .client-screen {
-    justify-content: space-between;
+    justify-content: end;
+    align-items: center;
     padding: 10px;
     margin: 20px;
 }
+
+.score-bar {
+    background-color: $score_bar_color;
+    width: 60px;
+
+    flex-shrink: 0;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+
+    .score-damn {
+        color: $score_bar_damn_col;
+    }
+
+    &.score-winner {
+        background-color: $score_bar_win_col;
+    }
+}
+
+
 
 .ping-div {
     margin: 10px;
