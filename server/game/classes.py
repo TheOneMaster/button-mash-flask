@@ -136,7 +136,8 @@ class MashGame():
         
         msg = {
             "freq": self.freq,
-            "time": self.gameTime
+            "time": self.gameTime,
+            "clients": {client.username: 0 for client in self.room.clients}
         }
         
         emit("start-game", msg, to=self.room.number)
@@ -313,7 +314,7 @@ class Room():
         for client in self.clients:
             client.status = ClientStatus.ACTIVE
             
-        self.game = MashGame(self, time=5)
+        self.game = MashGame(self, time=10)
         self.game.start_game()
         
         self.status = RoomStatus.END

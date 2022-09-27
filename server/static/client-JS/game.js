@@ -207,8 +207,9 @@ socket.on("start-game", (settings) => {
 
   let freq = settings.freq;
   let time = settings.time;
+  let clients = settings.clients;
 
-  game.updateSettings(freq, time);
+  game.updateSettings(freq, time, clients);
 
   // Hide div in middle of screen
   let buttonsDiv = document.getElementById("gameButtons");
@@ -230,39 +231,7 @@ socket.on("waiting-game", () => {
 });
 
 socket.on("game-score", (score) => {
-  let gameLobby = document.getElementById('lobbyMain');
-
-  let scores = Object.values(score);
-  let max_score = Math.max(...scores)
-
-  for (let username in score) {
-    let userDiv = gameLobby.querySelector(`[data-username="${username}"]`);
-    let output = userDiv.querySelector('output');
-    let score_bar = userDiv.querySelector('.score-bar');
-
-    let cur_score = score[username];
-
-    if (cur_score === max_score) {
-      score_bar.classList.add('score-winner');
-    } else if (score_bar.classList.contains('score-winner')) {
-      score_bar.classList.remove('score-winner');
-    }
-
-    let cur_height_ratio = (cur_score/20);    // Goddamn, imagine having more than 20 cps
-    let cur_height = cur_height_ratio * 600
-
-    if (cur_height_ratio >= 1) {
-      score_bar.classList.add('score-damn');
-    } else if (score_bar.classList.contains('score-damn') && cur_height_ratio < 1) {
-      score_bar.classList.remove('score-damn');
-    }
-
-    score_bar.style.height = `${cur_height}px`;
-
-    output.textContent = score[username];
-  }
-
-  console.log(score);
+  game._current_score = score;
 });
 
 socket.on('game-end', () => {
@@ -270,6 +239,7 @@ socket.on('game-end', () => {
 })
 
 const game = {
+  // Game settings
   maxTime: 5,
   totalPress: 0,
   score: 0,
@@ -283,11 +253,18 @@ const game = {
   freq: 30,
   tick: 0,
 
+  // Temp data during the game
   gameInterval: undefined,
+  animationLoop: undefined,
+  _current_score: undefined,
 
-  updateSettings(freq, time) {
+  // DOM Elements
+  gameLobby: undefined,
+
+  updateSettings(freq, time, clients) {
     this.freq = freq;
     this.maxTime = time;
+    this._current_score = clients;
   },
 
   resetGame: function () {
@@ -304,10 +281,15 @@ const game = {
 
   initGame: function () {
     game.setCallbacks();
+    
+    game.gameLobby = document.getElementById('lobbyMain');
 
     game.start_time = new Date().getTime();
 
     game.gameInterval = setInterval(game.gameLoop, 1000 / game.freq);
+    game.animationLoop = requestAnimationFrame(game.gameAnimation);
+    
+
     // setTimeout(() => game.gameEnd(gameloop), 1000 * game.maxTime);
   },
 
@@ -331,6 +313,7 @@ const game = {
 
   gameEnd: function () {
     clearInterval(game.gameInterval);
+    cancelAnimationFrame(this.animationLoop);
     socket.emit("game-end");
     game.resetGame();
 
@@ -343,4 +326,70 @@ const game = {
       game.totalPress += 1;
     }
   },
+
+  gameAnimation() {
+    
+    let scores = Object.values(game._current_score);
+    let max_score = Math.max(...scores);
+    let sorted_scores = scores.sort((a, b) => b-a)
+
+    for (let username in game._current_score) {
+      // Dom elements
+      let userDiv = game.gameLobby.querySelector(`[data-username="${username}"]`);
+      let output = userDiv.querySelector('output');
+      let score_bar = userDiv.querySelector('.score-bar');
+
+      let user_score = game._current_score[username];
+      let orig_dim = userDiv.getBoundingClientRect();
+
+      // Add winner class to winning user
+      if (user_score === max_score) {
+        score_bar.classList.add('score-winner');
+      } else if (score_bar.classList.contains('score-winner')) {
+        score_bar.classList.remove('score-winner');
+      }
+
+      // Calculate height of the score bar
+      let cur_height_ratio = (user_score/20);
+      let cur_height = cur_height_ratio * 600
+
+      // Add class if user score is over 20 CPS (Clicks Per Second)
+      if (cur_height_ratio >= 1) {
+        score_bar.classList.add('score-damn');
+      } else if (score_bar.classList.contains('score-damn')) {
+        score_bar.classList.remove('score-damn');
+      }
+
+      // Set order of users by score
+      let cur_order = sorted_scores.indexOf(user_score);
+      userDiv.style.order = `${cur_order}`;
+
+      let new_dim = userDiv.getBoundingClientRect();
+
+      if (new_dim.left !== orig_dim.left){
+        console.log({orig: orig_dim, new: new_dim});
+      }
+      
+
+      let delta_x = orig_dim.left - new_dim.left;
+
+      if (delta_x !== 0) {
+        userDiv.style.transform = `translateX(${delta_x}px)`;
+        userDiv.style.transition = `transform 0s`;
+
+        requestAnimationFrame(() => {
+          userDiv.style.transition = `transform 500ms`;
+          userDiv.style.transform = '';
+        }) 
+      } 
+
+      // Change attributes
+      score_bar.style.height = `${cur_height}px`;
+      output.textContent = user_score;
+    }
+
+    game.animationLoop = requestAnimationFrame(game.gameAnimation);
+  }
+
+
 };
