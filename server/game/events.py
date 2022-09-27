@@ -76,19 +76,10 @@ def gameReady():
     
     ## Conditions to be reached before starting the game
     
-    # Minimum 2 players (in prod)
-    
-    debug_env = os.environ.get("DEBUG") == "TRUE"
-    
-    if debug_env:
-        min_players_check = True
-    else:
-        min_players_check = len(room) >= 2
-    
     # all clients are waiting (have pressed the start game button)
     all_users_ready = user.room.checkUsersStatus(ClientStatus.WAITING)
     
-    if min_players_check and all_users_ready:
+    if all_users_ready:
         user.room.playGame()
     else:
         emit('waiting-game')

@@ -23,6 +23,7 @@ class BaseGame():
         self.freq = freq
         self.tickTime = 1/freq
         self.startTime = None
+        self.clients = [client.username for client in room.clients]
         
     def __repr__(self) -> str:
         rep = f"{self.__class__.__name__}(room={self.room.number}, freq={self.freq})"
@@ -31,7 +32,7 @@ class BaseGame():
         
 class TimeGame(BaseGame):
     
-    def __init__(self, room, time=10, freq=30) -> None:
+    def __init__(self, room, time=10, freq=30, *args, **kwargs) -> None:
         """Time-based game. Button Mash for a specified duration of time and the winner is
         the one with the highest score at the end of the time period.
 
@@ -40,7 +41,7 @@ class TimeGame(BaseGame):
             time (int, optional): Maximum time for the game in seconds. Defaults to 10.
             freq (int, optional): Frequency (tick rate) of the game. Defaults to 30.
         """
-        super().__init__(room, time, freq)
+        super().__init__(room, time, freq, *args, **kwargs)
         
         self.totalTicks = freq * time
         self.ticks = [None] * self.totalTicks
@@ -49,7 +50,7 @@ class TimeGame(BaseGame):
         
     def start_game(self):
         self.startTime = datetime.now()
-        self._cur_score = [0 for i in self.room.clients]
+        self._cur_score = [0 for i in self.clients]
         
         msg = {
             "type": "time",
@@ -75,8 +76,7 @@ class TimeGame(BaseGame):
             scores = [score/delta_sec for score in total_score]
             scores = [round(score, 3) for score in scores]
             
-            usernames = [client.username for client in self.room.clients]
-            scores = {username: score for username, score in zip(usernames, scores)}
+            scores = {username: score for username, score in zip(self.clients, scores)}
             
             emit('game-score', scores, to=self.room.number)
             
@@ -86,12 +86,11 @@ class TimeGame(BaseGame):
         
         emit("game-end", to=self.room.number)
         
-        # Do not save game if debug mode
-        if os.environ.get('DEBUG') == 'TRUE':
+        # Do not save game if debug mode or single-player
+        if os.environ.get('DEBUG') == 'TRUE' or len(self.clients) == 1:
             return
         
         gameID = str(uuid4())
-        clients = [client.username for client in self.room.clients]
         
         # Get winner and runner up
         final_score = self.ticks[-1]
@@ -105,7 +104,7 @@ class TimeGame(BaseGame):
         }
         
         # Create new game object from game data
-        game = Game(id=gameID, clients=clients, ticks=self.ticks, **podium)
+        game = Game(id=gameID, clients=self.clients, ticks=self.ticks, **podium)
         
         # Add game to participatedGames for any user that is in the DB
         for client in self.room.clients:
