@@ -18,7 +18,7 @@ def generate_uuid():
     return uuid4().hex
 
 def default_picture():
-    return url_for('static', filename="Images/profile.png")
+    return url_for('static', filename="Images/profile.webp")
 
 
 

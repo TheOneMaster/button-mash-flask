@@ -1,15 +1,25 @@
 @use "sass:color";
 
 // Default dark mode CSS
+$danger: rgb(255, 56, 96);
+$current_user: rgb(100, 150, 255);
+$dropdown_color: #272727;
+
+$theme-color: darkcyan;
+
+
+$score_bar_color: blue;
+$score_bar_win_col: green;
+$score_bar_damn_col: darkorange;
 
 :root {
-    --theme-color: darkcyan;
+    --theme-color: #{$theme-color};
     --title-font: "Rubik", sans-serif;
     --content-font: "Roboto", sans-serif;
 
     --background-color: rgb(18, 18, 18);
-    --primary-font-color: #{color.change(white, $alpha: 0.87)};
-    --second-font-color: #{color.change(white, $alpha: 0.6)};
+    --primary-font-color: rgba(255, 255, 255, 0.87);
+    --second-font-color: rgba(255, 255, 255, 0.6);
 }
 
 body {
@@ -61,7 +71,7 @@ body {
 }
 
 .is-danger {
-    background-color: hsl(348, 100%, 61%);
+    background-color: $danger;
 }
 
 /* Top Bar */
@@ -76,6 +86,8 @@ h1, h2 {
     padding-left: 20px;
     padding-right: 20px;
     align-items: center;
+
+    min-height: 100px;
 
     @include elevation(3);
 
@@ -96,22 +108,89 @@ h1, h2 {
     margin: 0;
 }
 
+#topProfile {
+    margin-left: auto;
+}
+
+
+$dropdown_item_border: rgba(white, 0.5);
 
 .profile {
-    height: 100px;
+    height: 70px;
     margin-left: auto;
     align-items: center;
 
-    img {
+    #profileImage {
         max-height: 100%;
         max-width: 100%;
         cursor: pointer;
     }
+
+    .profile-dropdown {
+        position: absolute;
+        top: 90px;
+        right: 20px;
+        border: rgba(white, 0.3) 1px solid;
+        border-top: none;
+
+        min-width: 250px;
+    }
+      
+    .dropdown-list {
+        padding: 0;
+        list-style-type: none;
+        margin: 0;
+    }
+    
+    .profile-option {
+        padding: 10px 20px;
+        border-bottom: 1px solid $dropdown_item_border;
+        background-color: $dropdown_color;
+        cursor: pointer;
+
+        &:hover {
+            background-color: color.scale($dropdown_color, $lightness: 30%);
+        }
+
+        a {
+            font-size: 1rem;
+            font-weight: 400;
+            margin: 0;
+            color: var(--second-font-color);
+        }
+
+        svg {
+            height: 20px;
+            margin-right: 10px;
+            fill: white;
+        }
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .profile-div {
+        padding: 0 10px;
+        background-color: $dropdown_color;
+        padding: 10px 20px;
+        border-bottom: $dropdown_item_border 1px solid;
+        align-items: center;
+
+        img {
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+    }
 }
 
-#topProfile {
-    margin-left: auto;
-}
+
 
 footer {
     margin-top: auto;
@@ -124,7 +203,6 @@ footer {
     position: relative;
 
     @include elevation(3);
-    
 
     .footer-credit {
         row-gap: 10px;
@@ -147,6 +225,14 @@ footer {
         svg {
             height: 30px;
         }
+    }
+
+    #link-github {
+        fill: white;
+    }
+
+    #link-twitter {
+        fill: rgb(29, 161, 242);
     }
 
 }
@@ -217,7 +303,7 @@ footer {
     }
 
     &.is-danger {
-        color: rgba(#FF385F, 0.8);
+        color: rgba($danger, 0.8);
     }
 }
 
@@ -237,13 +323,6 @@ footer {
 /* Game CSS */
 .game-container {
     height: 100%;
-
-
-
-
-
-
-
 }
 
 .game-main {
@@ -255,7 +334,11 @@ footer {
     position: relative;
     transition: 1s;
 
-    @include elevation(1)
+    @include elevation(1);
+}
+
+.current-user {
+    color: rgba($current_user, 0.8);
 }
 
 .lobby-screen {
@@ -264,10 +347,31 @@ footer {
 }
 
 .client-screen {
-    justify-content: space-between;
+    justify-content: end;
+    align-items: center;
     padding: 10px;
     margin: 20px;
 }
+
+.score-bar {
+    background-color: $score_bar_color;
+    width: 60px;
+
+    flex-shrink: 0;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+
+    .score-damn {
+        color: $score_bar_damn_col;
+    }
+
+    &.score-winner {
+        background-color: $score_bar_win_col;
+    }
+}
+
+
 
 .ping-div {
     margin: 10px;
@@ -452,10 +556,23 @@ footer {
 
     footer {
         background-color: green;
+        color:white;
+
+        #link-github {
+            fill: black;
+        }
     }
 
     .game-settings, .game-main, .authbox {
         background-color: initial;
+    }
+
+    .current-user {
+        color: $current_user;
+    }
+
+    .ping-div span {
+        color:indianred;
     }
 
     .notification {

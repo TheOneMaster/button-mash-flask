@@ -3,7 +3,7 @@ import json
 
 from flask import Blueprint, render_template, redirect, request, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 
 from .helper import no_login
 from .. import db, login_manager
@@ -49,7 +49,7 @@ def signup_post():
     response = urlopen(f"https://ipinfo.io/{ip}/json")
     data = json.load(response)
     
-    country = data['country']
+    country = data.get('country', 'test')
     
     newUser = User(email=form['email'], username=form['username'], password=password, country=country)
     
@@ -84,3 +84,10 @@ def login_post():
 
     
     return redirect(url_for('auth.login'))
+
+
+@auth.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')

@@ -83,7 +83,7 @@ def gameReady():
     if debug_env:
         min_players_check = True
     else:
-        min_players_check = len(room) < 2
+        min_players_check = len(room) >= 2
     
     # all clients are waiting (have pressed the start game button)
     all_users_ready = user.room.checkUsersStatus(ClientStatus.WAITING)

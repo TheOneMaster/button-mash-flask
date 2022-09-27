@@ -3,5 +3,3 @@
 /.vscode
 *__pycache__
 .env
-/server/test.db
-/json-store

@@ -8,7 +8,7 @@
 {% block body %}
 <div class="game-container flex-row">
     <div class="game-main" id="gameMain" tabindex="1">
-        <img id="settingsGear" src="{{ url_for('static', filename='Images/gear.png') }}">
+        <img id="settingsGear" src="{{ url_for('static', filename='Images/gear.webp') }}">
         
         <div class="game-buttons flex-row" id="gameButtons">
             <button id="game-start" class="btn" onclick="startGame()">Start Game</button>
@@ -25,8 +25,13 @@
         <template class="client-screen flex-col" id="clientMain">
 
             <div class="client-screen flex-col">
-                <div class="client-score">
-                    <output></output>
+
+                <div class="score-bar">
+
+                    <div class="client-score">
+                        <output></output>
+                    </div>
+                
                 </div>
                 
                 <div class="client-username">

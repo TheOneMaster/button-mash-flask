@@ -46,7 +46,7 @@ body {
 }
 
 .is-danger {
-  background-color: #FF385F;
+  background-color: rgb(255, 56, 96);
 }
 
 /* Top Bar */
@@ -61,6 +61,7 @@ h1, h2 {
   padding-left: 20px;
   padding-right: 20px;
   align-items: center;
+  min-height: 100px;
   z-index: 3;
   background-color: rgba(255, 255, 255, 0.09);
 }
@@ -80,19 +81,71 @@ h1, h2 {
   margin: 0;
 }
 
+#topProfile {
+  margin-left: auto;
+}
+
 .profile {
-  height: 100px;
+  height: 70px;
   margin-left: auto;
   align-items: center;
 }
-.profile img {
+.profile #profileImage {
   max-height: 100%;
   max-width: 100%;
   cursor: pointer;
 }
-
-#topProfile {
-  margin-left: auto;
+.profile .profile-dropdown {
+  position: absolute;
+  top: 90px;
+  right: 20px;
+  border: rgba(255, 255, 255, 0.3) 1px solid;
+  border-top: none;
+  min-width: 250px;
+}
+.profile .dropdown-list {
+  padding: 0;
+  list-style-type: none;
+  margin: 0;
+}
+.profile .profile-option {
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  background-color: #272727;
+  cursor: pointer;
+}
+.profile .profile-option:hover {
+  background-color: #686868;
+}
+.profile .profile-option a {
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+  color: var(--second-font-color);
+}
+.profile .profile-option svg {
+  height: 20px;
+  margin-right: 10px;
+  fill: white;
+}
+.profile .profile-option:last-child {
+  border-bottom: none;
+}
+.profile .profile-div {
+  padding: 0 10px;
+  background-color: #272727;
+  padding: 10px 20px;
+  border-bottom: rgba(255, 255, 255, 0.5) 1px solid;
+  align-items: center;
+}
+.profile .profile-div img {
+  height: 50px;
+  margin-right: 15px;
+}
+.profile .profile-div p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 footer {
@@ -115,13 +168,19 @@ footer p {
 }
 footer .footer-links {
   position: absolute;
-  left: calc(50% + 100px);
+  right: 30px;
   top: 50%;
-  column-gap: 10px;
+  column-gap: 15px;
   transform: translateY(-50%);
 }
 footer .footer-links svg {
   height: 30px;
+}
+footer #link-github {
+  fill: white;
+}
+footer #link-twitter {
+  fill: rgb(29, 161, 242);
 }
 
 .footer-pain {
@@ -188,7 +247,7 @@ footer .footer-links svg {
   color: rgba(128, 159, 255, 0.8);
 }
 .notification.is-danger {
-  color: rgba(255, 56, 95, 0.8);
+  color: rgba(255, 56, 96, 0.8);
 }
 
 .submit-btn {
@@ -219,15 +278,35 @@ footer .footer-links svg {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+.current-user {
+  color: rgba(100, 150, 255, 0.8);
+}
+
 .lobby-screen {
   height: 100%;
   justify-content: space-around;
 }
 
 .client-screen {
-  justify-content: space-between;
+  justify-content: end;
+  align-items: center;
   padding: 10px;
   margin: 20px;
+}
+
+.score-bar {
+  background-color: blue;
+  width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
+.score-bar .score-damn {
+  color: darkorange;
+}
+.score-bar.score-winner {
+  background-color: green;
 }
 
 .ping-div {
@@ -330,10 +409,6 @@ footer .footer-links svg {
   overflow: hidden;
 }
 
-.current-user {
-  color: rgba(100, 150, 255, 0.8);
-}
-
 /* Dialog */
 .lobby-dialog {
   height: 500px;
@@ -399,8 +474,17 @@ footer .footer-links svg {
     background-color: green;
     color: white;
   }
+  footer #link-github {
+    fill: black;
+  }
   .game-settings, .game-main, .authbox {
     background-color: initial;
+  }
+  .current-user {
+    color: rgb(100, 150, 255);
+  }
+  .ping-div span {
+    color: indianred;
   }
   .notification {
     background-color: darkgray;
@@ -413,11 +497,6 @@ footer .footer-links svg {
     background-color: #FF385F;
     color: white;
   }
-  .current-user {
-    color: rgb(100, 150, 255);
-  }
 }
-
-/*# sourceMappingURL=style.css.map */
 
 /*# sourceMappingURL=style.css.map */
