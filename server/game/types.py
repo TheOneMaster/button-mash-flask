@@ -116,4 +116,7 @@ class TimeGame(BaseGame):
         db.session.add(game)
         db.session.commit()
         
+    def update_score(self, client, score):
         
+        index = self.room.clients.index(client)
+        self._cur_score[index] = score
