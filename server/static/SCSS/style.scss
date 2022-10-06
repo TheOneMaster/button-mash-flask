@@ -176,6 +176,7 @@ $dropdown_item_border: rgba(white, 0.5);
         padding: 10px 20px;
         border-bottom: $dropdown_item_border 1px solid;
         align-items: center;
+        color: var(--primary-font-color);
 
         img {
             height: 50px;
@@ -536,6 +537,9 @@ footer {
 }
 
 
+$dropdown_color: white;
+$dropdown_item_border: rgba(black, 0.8);
+
 // Light mode customization
 @media screen and (prefers-color-scheme: light) {
     
@@ -589,6 +593,29 @@ footer {
             color: white;
         }
         
+    }
+
+    .profile {
+
+        .profile-dropdown {
+            border-color: $dropdown_item_border;
+        }
+        .profile-div {
+            background-color: $dropdown_color;
+            border-color: $dropdown_item_border;
+        }
+        .profile-option {
+            background-color: $dropdown_color;
+            border-color: $dropdown_item_border;
+
+            &:hover {
+                background-color: color.scale($dropdown_color, $lightness: -30%);
+            }
+
+            svg {
+                fill: black;
+            }
+        }
     }
 
 }

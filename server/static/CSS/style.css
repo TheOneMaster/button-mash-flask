@@ -137,6 +137,7 @@ h1, h2 {
   padding: 10px 20px;
   border-bottom: rgba(255, 255, 255, 0.5) 1px solid;
   align-items: center;
+  color: var(--primary-font-color);
 }
 .profile .profile-div img {
   height: 50px;
@@ -496,6 +497,23 @@ footer #link-twitter {
   .notification.is-danger {
     background-color: #FF385F;
     color: white;
+  }
+  .profile .profile-dropdown {
+    border-color: rgba(0, 0, 0, 0.8);
+  }
+  .profile .profile-div {
+    background-color: white;
+    border-color: rgba(0, 0, 0, 0.8);
+  }
+  .profile .profile-option {
+    background-color: white;
+    border-color: rgba(0, 0, 0, 0.8);
+  }
+  .profile .profile-option:hover {
+    background-color: #b3b3b3;
+  }
+  .profile .profile-option svg {
+    fill: black;
   }
 }
 
