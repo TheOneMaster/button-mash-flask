@@ -1,13 +1,28 @@
-// JS for the HTML
 "use strict"
 
+class UserSettings {
+
+  constructor(username="", lobby="", mashKey=" ") {
+    this.username = username;
+    this.room = lobby;
+    this.mashKey = mashKey;
+  }
+}
+
+const USER_SETTINGS = new UserSettings();
+
 const eventHandlers = {
+  // Global event handlers for the DOM are stored here
+
   settingsToggle: function () {
+    // Toggle settings menu visibility
     let settings = document.getElementById("gameSettings");
     settings.classList.toggle("hidden");
   },
 
   activeLobby: function () {
+    // Set currently clicked lobby as "active"
+
     let lobby = document.getElementById('lobbyGrid');
     let rooms = lobby.childNodes;
 
@@ -22,13 +37,111 @@ const eventHandlers = {
 
     this.classList.add(active)
   },
+
+  editUsername: function() {
+
+    // Get current username
+    let usernameEl = document.getElementById("username");
+    let username = usernameEl.textContent.trim();
+
+    // Replace span with input
+
+    let inputEl = document.createElement("input");
+    inputEl.id = "usernameInput";
+    inputEl.value = username;                  // Add current username to the input element text
+
+    usernameEl.replaceWith(inputEl);
+
+    inputEl.addEventListener("keypress", (e) => {
+      if (e.key === 'Enter') {
+        eventHandlers.saveUsername();
+      }
+    })
+
+    inputEl.focus()
+
+    let editUserEl = document.getElementById('editUsername');
+    editUserEl.removeEventListener("click", eventHandlers.editUsername);
+    editUserEl.addEventListener("click", eventHandlers.saveUsername);
+  },
+
+  saveUsername: function() {
+
+    let inputEl = document.getElementById("usernameInput");
+    
+    let newUsernameEl = document.createElement("span");
+    newUsernameEl.id = "username";
+
+    newUsernameEl.textContent = inputEl.value.trim();    
+    inputEl.replaceWith(newUsernameEl);
+
+    changeUsername()
+
+    let editUserEl = document.getElementById('editUsername');
+    editUserEl.removeEventListener("click", eventHandlers.saveUsername);
+    editUserEl.addEventListener("click", eventHandlers.editUsername);
+  },
+
+  editRoom: function() {
+    let roomEl = document.getElementById("room");
+    let roomNum = Number(roomEl.textContent);
+
+    let roomInput = document.createElement("input");
+    roomInput.id = "roomInput";
+    roomInput.value = roomNum;
+
+    roomEl.replaceWith(roomInput);
+
+    roomInput.addEventListener("keypress", (e) => {
+      if (e.key === 'Enter') {
+        eventHandlers.saveRoom();
+      }
+    })
+
+    roomInput.focus();
+
+    let editRoomEl = document.getElementById("editRoom");
+    editRoomEl.removeEventListener("click", eventHandlers.editRoom);
+    editRoomEl.addEventListener("click", eventHandlers.saveRoom);
+
+  },
+
+  saveRoom: function() {
+    let inputEl = document.getElementById("roomInput");
+
+    let newRoomEl = document.createElement("span");
+    newRoomEl.id = "room";
+
+    newRoomEl.textContent = inputEl.value.trim();
+    inputEl.replaceWith(newRoomEl);
+
+    changeRoom()
+    console.log('test')
+
+    let editRoomEl = document.getElementById('editRoom');
+    editRoomEl.removeEventListener("click", eventHandlers.saveRoom);
+    editRoomEl.addEventListener("click", eventHandlers.editRoom);
+  }
 };
 
 function addEventHandlers() {
 
+  // Add event handlers to the DOM on initial page load
+
   // Settings wheel click listener
   let settings_gear = document.getElementById("settingsGear");
   settings_gear.addEventListener("click", eventHandlers.settingsToggle);
+
+  // Edit & Save username
+  let editUserEl = document.getElementById('editUsername');
+  if (editUserEl !== null) {
+    editUserEl.addEventListener("click", eventHandlers.editUsername);
+  }
+
+  // Edit & Save room number
+  let editRoomEl = document.getElementById("editRoom");
+  editRoomEl.addEventListener("click", eventHandlers.editRoom);
+  
 }
 
 // Socket IO stuff
@@ -36,28 +149,22 @@ function addEventHandlers() {
 const socket = io();
 
 function changeRoom() {
-  let room_entry = document.getElementById("roomId");
-  let curRoom = document.getElementById("roomId-str");
 
-  curRoom = curRoom.textContent.slice(17);
-  let room = room_entry.value;
+  let roomEl = document.getElementById("room");
+  let roomNum = Number(roomEl.textContent);
 
-  if (room && room !== curRoom) {
-    socket.emit("room-change", Number(room));
-    room_entry.value = "";
+  if (roomNum !== USER_SETTINGS.room) {
+    socket.emit("room-change", roomNum)
   }
+
 }
 
 function changeUsername() {
-  let userString = document.getElementById("username-str");
-  let username = userString.dataset.str;
+  let usernameEl = document.getElementById("username");
+  let username = usernameEl.textContent;
 
-  let usernameInp = document.getElementById("usernameInp");
-  let inpString = usernameInp.value;
-
-  if (inpString && username !== inpString) {
-    socket.emit("username-change", inpString);
-    usernameInp.value = "";
+  if (username !== USER_SETTINGS.username) {
+    socket.emit("username-change", username);
   }
 }
 
@@ -101,7 +208,7 @@ socket.on('latency-pong', () => {
     pingEl = document.getElementById('pingOutput');
   }
 
-  pingEl.textContent = ping;
+  pingEl.textContent = `${ping} ms`;
 })
 
 
@@ -113,32 +220,24 @@ socket.on("client-settings", (json) => {
   let username = json.username;
   let room = json.room;
 
-  let curUserEl = document.getElementById("username-str");
-  let curUser = curUserEl.dataset.str;
+  USER_SETTINGS.username = username;
+  USER_SETTINGS.room = room;
 
-  if (!curUser || curUser !== username) {
-    curUserEl.dataset.str = username;
-    curUserEl.textContent = `Username: ${username}`;
-  }
+  let usernameEl = document.getElementById("username");
+  usernameEl.textContent = username;
 
-  let curRoomEl = document.getElementById("roomId-str");
-  let curRoom = curRoomEl.dataset.room;
-
-  if (!curRoom || curRoom !== room) {
-    curRoomEl.dataset.room = room;
-    curRoomEl.textContent = `Current room ID: ${room}`;
-  }
-
-  // console.log("Updated settings");
+  let roomEl = document.getElementById('room');
+  roomEl.textContent = room;
 });
 
 socket.on('room-update', (clients) => {
 
+  console.log(clients);
+
   let template = document.getElementById('clientMain').content.firstElementChild;
   let client_screen = document.getElementById('lobbyMain');
 
-  let curUserEl = document.getElementById('username-str');
-  let curUser = curUserEl.dataset.str;
+  let curUser = USER_SETTINGS.username;
 
   let clientList = []
   for (let client in clients) {
@@ -344,3 +443,5 @@ const game = {
     }
   },
 };
+
+addEventHandlers();

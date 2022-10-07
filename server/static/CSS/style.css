@@ -5,6 +5,7 @@
   --background-color: rgb(18, 18, 18);
   --primary-font-color: rgba(255, 255, 255, 0.87);
   --second-font-color: rgba(255, 255, 255, 0.6);
+  --current-user-color: rgba(100, 150, 255, 0.8);
 }
 
 body {
@@ -267,6 +268,56 @@ footer #link-twitter {
   height: 100%;
 }
 
+.user-settings {
+  min-width: 200px;
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid black;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.user-settings .user-settings-top {
+  align-items: center;
+}
+.user-settings .user-settings-top ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+.user-settings .user-settings-top h2 {
+  text-decoration: underline;
+}
+.user-settings .user-settings-item {
+  color: var(--primary-font-color);
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+.user-settings .user-settings-item:last-child {
+  margin-left: auto;
+}
+.user-settings .user-settings-item span {
+  color: var(--second-font-color);
+  margin-left: 5px;
+  font-weight: 400;
+}
+.user-settings .user-settings-item input {
+  margin-left: 10px;
+}
+.user-settings .user-settings-item svg {
+  fill: white;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.user-settings .user-settings-item > div {
+  margin-left: auto;
+}
+.user-settings #username {
+  color: var(--current-user-color);
+}
+
 .game-main {
   flex-grow: 1;
   margin-left: 20px;
@@ -280,7 +331,7 @@ footer #link-twitter {
 }
 
 .current-user {
-  color: rgba(100, 150, 255, 0.8);
+  color: var(--current-user-color);
 }
 
 .lobby-screen {
@@ -464,6 +515,7 @@ footer #link-twitter {
     --background-color: white;
     --primary-font-color: black;
     --second-font-color: rgb(32, 32, 32);
+    --current-user-color: rgb(100, 150, 255);
   }
   .topbar {
     background-color: var(--theme-color);
@@ -480,6 +532,9 @@ footer #link-twitter {
   }
   .game-settings, .game-main, .authbox {
     background-color: initial;
+  }
+  .user-settings .user-settings-item svg {
+    fill: black;
   }
   .current-user {
     color: rgb(100, 150, 255);
