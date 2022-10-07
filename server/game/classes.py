@@ -93,19 +93,19 @@ class Client():
         if new_room is None:
             new_room = Room(room)
         
-        else:
-            try: 
-                new_room.addUser(self)
+        try: 
+            new_room.addUser(self)
+            self.room = new_room
+            self.update()
+
+            print(f"{self.username} moved to room {self.room.number}")
+            
+        except ValueError as error:
+            emit(error.message)
                 
-            except ValueError as error:
-                emit(error.message)
         
-        self.room = new_room
         
-        self.update()
-        self.room.addUser(self)
         
-        print(f"{self.username} moved to room {self.room.number}")
     
     def delete(self):
         """Delete the User by removing all references to the object.
