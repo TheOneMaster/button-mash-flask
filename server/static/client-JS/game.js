@@ -2,7 +2,7 @@
 
 class UserSettings {
 
-  constructor(username="", lobby="", mashKey=" ") {
+  constructor(username="", lobby="", mashKey="Space") {
     this.username = username;
     this.room = lobby;
     this.mashKey = mashKey;
@@ -116,11 +116,41 @@ const eventHandlers = {
     inputEl.replaceWith(newRoomEl);
 
     changeRoom()
-    console.log('test')
 
     let editRoomEl = document.getElementById('editRoom');
     editRoomEl.removeEventListener("click", eventHandlers.saveRoom);
     editRoomEl.addEventListener("click", eventHandlers.editRoom);
+  },
+
+  editMashKey: function() {
+    let mashKeyEl = document.getElementById('mashKey');
+    let editMashKeyEl = document.getElementById('editMashKey');
+
+    let inputMashKey = document.createElement('input');
+    inputMashKey.id = "mashKeyInput";
+
+    mashKeyEl.replaceWith(inputMashKey);
+    
+    inputMashKey.focus();
+
+    function saveMashKey(e) {
+      let key = e.code;
+      USER_SETTINGS.mashKey = key;
+
+      let newMashKeyEl = document.createElement("span");
+      newMashKeyEl.id = "mashKey";
+      newMashKeyEl.textContent = key;
+
+      inputMashKey.replaceWith(newMashKeyEl);
+
+      editMashKeyEl.addEventListener("click", eventHandlers.editMashKey)
+
+    }
+
+    inputMashKey.addEventListener("keypress", saveMashKey)
+
+    editMashKeyEl.removeEventListener("click", eventHandlers.editMashKey);
+
   }
 };
 
@@ -133,14 +163,18 @@ function addEventHandlers() {
   settings_gear.addEventListener("click", eventHandlers.settingsToggle);
 
   // Edit & Save username
-  let editUserEl = document.getElementById('editUsername');
-  if (editUserEl !== null) {
-    editUserEl.addEventListener("click", eventHandlers.editUsername);
+
+  let options = ['editUsername', 'editRoom', 'editMashKey'];
+
+  for (let option of options) {
+    let editEl = document.getElementById(option);
+
+    if (editEl !== null) {
+      editEl.addEventListener("click", eventHandlers[option]);
+    }
   }
 
-  // Edit & Save room number
-  let editRoomEl = document.getElementById("editRoom");
-  editRoomEl.addEventListener("click", eventHandlers.editRoom);
+  document.getElementById("mashKey").textContent = USER_SETTINGS.mashKey;
   
 }
 
@@ -231,8 +265,6 @@ socket.on("client-settings", (json) => {
 });
 
 socket.on('room-update', (clients) => {
-
-  console.log(clients);
 
   let template = document.getElementById('clientMain').content.firstElementChild;
   let client_screen = document.getElementById('lobbyMain');
@@ -403,6 +435,8 @@ const game = {
 
   initGame: function () {
     game.setCallbacks();
+    
+    game.mash_key = USER_SETTINGS.mashKey;
 
     game.start_time = new Date().getTime();
 
@@ -438,7 +472,7 @@ const game = {
   },
 
   __keypress__: function (e) {
-    if (game.mash_key == e.key) {
+    if (game.mash_key == e.code) {
       game.totalPress += 1;
     }
   },
