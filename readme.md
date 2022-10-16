@@ -16,6 +16,6 @@ The winner of the game is represented by the one who has the green bar.
 - Create homepage with game data and leaderboard
 - Create graphs for users
 - Replay system for previous games
-- Allow key choice for mashing
 - Allow gamepad native input for mashing (probably restrict room selection by input type)
+- Add 3 second countdown once all users are ready to start game
 
