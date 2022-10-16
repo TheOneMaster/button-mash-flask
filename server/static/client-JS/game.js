@@ -2,14 +2,89 @@
 
 class UserSettings {
 
-  constructor(username="", lobby="", mashKey="Space") {
+  constructor(socket, username = "", lobby = "", mashKey = "Space") {
+    this.socket = socket;
     this.username = username;
     this.room = lobby;
     this.mashKey = mashKey;
   }
+
+  // Set client properties when first connecting to Server
+  setUsername(new_name) {
+    this._username = new_name
+  }
+
+  setRoom(new_room) {
+    this._room = new_room;
+  }
+
+  // Manipulate Client properties from browser
+  get username() {
+    return this._username;
+  }
+
+  set username(new_name) {
+    if (new_name !== "" && new_name !== this.username) {
+      this.socket.emit('username-change', new_name);
+      this._username = new_name;
+    }
+  }
+
+  get room() {
+    return this._room;
+  }
+
+  set room(new_room) {
+    if (new_room !== "" && new_room !== this.room) {
+      socket.emit('room-change', new_room);
+      this._room = new_room;
+    }
+  }
+
+
 }
 
-const USER_SETTINGS = new UserSettings();
+class Ping {
+  constructor() {
+    this.pings = []
+    this.pingTime = null;
+  }
+
+  getPing() {
+    let ping_sum = this.pings.reduce((a, b) => a + b, 0);
+    let ping_length = this.pings.length;
+
+    return Math.floor(ping_sum / ping_length);
+  }
+
+  sendPing = () => {
+    this.pingTime = new Date().getTime();
+    socket.volatile.emit('latency-ping');
+  }
+
+  /**
+   * Add a ping value to the list of ping values
+   * @param {Number} ping latency value from the most recent ping
+   */
+  addPing(ping) {
+    
+    this.pings.push(ping);
+
+    if (this.pings.length > 5) {
+      this.pings = this.pings.slice(1, this.pings.length);
+    }
+  }
+
+  updatePing() {
+    let pingEl = document.getElementById('pingOutput');
+    pingEl.textContent = `${this.getPing()} ms`;
+  }
+
+  disconnected() {
+    let pingEl = document.getElementById('pingOutput');
+    pingEl.textContent = 'disconnected';
+  }
+}
 
 const eventHandlers = {
   // Global event handlers for the DOM are stored here
@@ -38,14 +113,13 @@ const eventHandlers = {
     this.classList.add(active)
   },
 
-  editUsername: function() {
+  editUsername: function () {
 
     // Get current username
     let usernameEl = document.getElementById("username");
     let username = usernameEl.textContent.trim();
 
     // Replace span with input
-
     let inputEl = document.createElement("input");
     inputEl.id = "usernameInput";
     inputEl.value = username;                  // Add current username to the input element text
@@ -65,24 +139,26 @@ const eventHandlers = {
     editUserEl.addEventListener("click", eventHandlers.saveUsername);
   },
 
-  saveUsername: function() {
+  saveUsername: function () {
 
     let inputEl = document.getElementById("usernameInput");
-    
+    let newUsername = inputEl.value.trim()
+
     let newUsernameEl = document.createElement("span");
     newUsernameEl.id = "username";
 
-    newUsernameEl.textContent = inputEl.value.trim();    
+    newUsernameEl.textContent = newUsername;
     inputEl.replaceWith(newUsernameEl);
 
-    changeUsername()
+    // Set new username
+    USER_SETTINGS.username(newUsername);
 
     let editUserEl = document.getElementById('editUsername');
     editUserEl.removeEventListener("click", eventHandlers.saveUsername);
     editUserEl.addEventListener("click", eventHandlers.editUsername);
   },
 
-  editRoom: function() {
+  editRoom: function () {
     let roomEl = document.getElementById("room");
     let roomNum = Number(roomEl.textContent);
 
@@ -106,23 +182,25 @@ const eventHandlers = {
 
   },
 
-  saveRoom: function() {
+  saveRoom: function () {
     let inputEl = document.getElementById("roomInput");
+    let newRoom = inputEl.value.trim();
 
     let newRoomEl = document.createElement("span");
     newRoomEl.id = "room";
 
-    newRoomEl.textContent = inputEl.value.trim();
+    newRoomEl.textContent = newRoom;
     inputEl.replaceWith(newRoomEl);
 
-    changeRoom()
+    newRoom = Number(newRoom)
+    USER_SETTINGS.room = newRoom;
 
     let editRoomEl = document.getElementById('editRoom');
     editRoomEl.removeEventListener("click", eventHandlers.saveRoom);
     editRoomEl.addEventListener("click", eventHandlers.editRoom);
   },
 
-  editMashKey: function() {
+  editMashKey: function () {
     let mashKeyEl = document.getElementById('mashKey');
     let editMashKeyEl = document.getElementById('editMashKey');
 
@@ -130,7 +208,7 @@ const eventHandlers = {
     inputMashKey.id = "mashKeyInput";
 
     mashKeyEl.replaceWith(inputMashKey);
-    
+
     inputMashKey.focus();
 
     function saveMashKey(e) {
@@ -163,7 +241,6 @@ function addEventHandlers() {
   settings_gear.addEventListener("click", eventHandlers.settingsToggle);
 
   // Edit & Save username
-
   let options = ['editUsername', 'editRoom', 'editMashKey'];
 
   for (let option of options) {
@@ -175,51 +252,23 @@ function addEventHandlers() {
   }
 
   document.getElementById("mashKey").textContent = USER_SETTINGS.mashKey;
-  
+
 }
 
 // Socket IO stuff
 
 const socket = io();
-
-function changeRoom() {
-
-  let roomEl = document.getElementById("room");
-  let roomNum = Number(roomEl.textContent);
-
-  if (roomNum !== USER_SETTINGS.room) {
-    socket.emit("room-change", roomNum)
-  }
-
-}
-
-function changeUsername() {
-  let usernameEl = document.getElementById("username");
-  let username = usernameEl.textContent;
-
-  if (username !== USER_SETTINGS.username) {
-    socket.emit("username-change", username);
-  }
-}
+const USER_SETTINGS = new UserSettings(socket);
+const PING = new Ping()
 
 function startGame() {
   socket.emit('game-ready');
 }
 
-let ping = undefined;
-let ping_start = undefined;
-let ping_loop = undefined;
-let pingEl = undefined;
-
-function sendPing() {
-  ping_start = new Date().getTime();
-  socket.volatile.emit('latency-ping');
-}
 
 
 socket.on("connect", () => {
-  ping_loop = setInterval(sendPing, 3000);
-  sendPing();
+  setInterval(PING.sendPing, 3000);
 });
 
 socket.on("disconnect", () => {
@@ -229,20 +278,17 @@ socket.on("disconnect", () => {
     game.gameEnd();
   }
 
-  pingEl.textContent = "disconnected";
-
+  PING.disconnected();
 })
 
 socket.on('latency-pong', () => {
   let current_time = new Date().getTime();
+  let ping_start = PING.pingTime;
 
-  ping = (current_time - ping_start) / 2;
+  let cur_ping = (current_time - ping_start) / 2;
 
-  if (pingEl === undefined) {
-    pingEl = document.getElementById('pingOutput');
-  }
-
-  pingEl.textContent = `${ping} ms`;
+  PING.addPing(cur_ping);
+  PING.updatePing();
 })
 
 
@@ -254,8 +300,8 @@ socket.on("client-settings", (json) => {
   let username = json.username;
   let room = json.room;
 
-  USER_SETTINGS.username = username;
-  USER_SETTINGS.room = room;
+  USER_SETTINGS.setUsername(username)
+  USER_SETTINGS.setRoom(room);
 
   let usernameEl = document.getElementById("username");
   usernameEl.textContent = username;
@@ -379,7 +425,7 @@ socket.on("game-score", (score) => {
       score_bar.classList.remove('score-winner');
     }
 
-    let cur_height_ratio = (cur_score/20);    // Goddamn, imagine having more than 20 cps
+    let cur_height_ratio = (cur_score / 20);    // Goddamn, imagine having more than 20 cps
     let cur_height = cur_height_ratio * 600
 
     if (cur_height_ratio >= 1) {
@@ -435,7 +481,7 @@ const game = {
 
   initGame: function () {
     game.setCallbacks();
-    
+
     game.mash_key = USER_SETTINGS.mashKey;
 
     game.start_time = new Date().getTime();
