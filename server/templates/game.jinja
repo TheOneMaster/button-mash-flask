@@ -73,6 +73,8 @@
             <ul id="room-client-list" class="flex-col">
                 
             </ul>
+
+            <button class="lobby-button" onclick="showLobby()">Show lobby</button>
         
             <template id="room-client-template">
                 <li class="room-client flex-row">
@@ -165,5 +167,18 @@
     
 
 </dialog>
+
+<script>
+
+    let dialogEl = document.getElementById('lobbyModal');
+
+    dialogEl.addEventListener("mousedown", (e) => {
+        if (e.target === dialogEl) {
+            document.body.classList.remove('blur');
+            dialogEl.close();
+        }
+    })
+
+</script>
 
 {% endblock %}

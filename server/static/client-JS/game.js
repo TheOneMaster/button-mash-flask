@@ -261,6 +261,12 @@ function addEventHandlers() {
 
 }
 
+function showLobby() {
+  let lobby = document.getElementById('lobbyModal');
+  document.body.classList.add('blur')
+  lobby.showModal()
+}
+
 // Socket IO stuff
 
 const socket = io();

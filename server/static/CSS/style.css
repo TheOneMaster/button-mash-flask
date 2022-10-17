@@ -50,6 +50,10 @@ body {
   background-color: rgb(255, 56, 96);
 }
 
+.blur {
+  filter: blur(5px);
+}
+
 /* Top Bar */
 h1, h2 {
   color: var(--primary-font-color);
@@ -353,6 +357,7 @@ footer #link-twitter {
   border-bottom: 1px solid black;
   color: var(--second-font-color);
   padding: 10px;
+  cursor: pointer;
   z-index: 5;
   background-color: rgba(255, 255, 255, 0.13);
 }
@@ -361,6 +366,13 @@ footer #link-twitter {
 }
 .left-bar .room-client.current-user {
   order: -1;
+}
+.left-bar .lobby-button {
+  border: none;
+  border-radius: 10px;
+  background-color: var(--theme-color);
+  color: white;
+  padding: 10px;
 }
 
 .game-main {
