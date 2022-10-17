@@ -9,14 +9,13 @@
 {% block body %}
 <div class="game-container flex-row">
 
-    <div class="user-settings" id="UserSettings">
+    <div class="left-bar">
     
-        <div class="user-settings-top flex-col">
+        <div class="user-settings flex-col">
 
             <h2>User Settings</h2>
 
             <ul>
-            
             <li>
                 <div class="user-settings-item flex-row">
                     Username:
@@ -64,10 +63,27 @@
                 </div>
 
             </li>
-
-
-
             </ul>
+        </div>
+
+        <div class="user-room flex-col">
+
+            <h2>Room Users</h2>
+        
+            <ul id="room-client-list" class="flex-col">
+                
+            </ul>
+        
+            <template id="room-client-template">
+                <li class="room-client flex-row">
+                    <div class="circle open-lobby"></div>
+                    <span></span>
+                    <div class="room-client-options flex-col">
+                        <button>Message</button>
+                        <button>Make Leader</button>
+                    </div>    
+                </li>
+            </template>
         </div>
 
     </div>

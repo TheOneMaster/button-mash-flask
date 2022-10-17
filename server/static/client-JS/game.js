@@ -1,8 +1,14 @@
 "use strict"
 
 class UserSettings {
-
-  constructor(socket, username = "", lobby = "", mashKey = "Space") {
+  /**
+   * Storage class for user settings
+   * @param  {Socket} socket SocketIO Client Object
+   * @param  {String} username Client username
+   * @param  {Number} lobby Client room number
+   * @param  {String} mashKey String representation of keyboard key to mash
+   */
+  constructor(socket, username = null, lobby = null, mashKey = "Space") {
     this.socket = socket;
     this.username = username;
     this.room = lobby;
@@ -24,7 +30,7 @@ class UserSettings {
   }
 
   set username(new_name) {
-    if (new_name !== "" && new_name !== this.username) {
+    if (new_name !== null && new_name !== this.username) {
       this.socket.emit('username-change', new_name);
       this._username = new_name;
     }
@@ -35,7 +41,7 @@ class UserSettings {
   }
 
   set room(new_room) {
-    if (new_room !== "" && new_room !== this.room) {
+    if (new_room !== null && new_room !== this.room) {
       socket.emit('room-change', new_room);
       this._room = new_room;
     }
@@ -117,12 +123,12 @@ const eventHandlers = {
 
     // Get current username
     let usernameEl = document.getElementById("username");
-    let username = usernameEl.textContent.trim();
+    let username = USER_SETTINGS.username;
 
     // Replace span with input
     let inputEl = document.createElement("input");
     inputEl.id = "usernameInput";
-    inputEl.value = username;                  // Add current username to the input element text
+    inputEl.value = username;                       // Add current username to the input element text
 
     usernameEl.replaceWith(inputEl);
 
@@ -265,6 +271,33 @@ function startGame() {
   socket.emit('game-ready');
 }
 
+function updateRoomClientsList(clients) {
+
+  let template = document.getElementById('room-client-template').content.firstElementChild;
+  let client_list = document.getElementById('room-client-list');
+
+  let client_arr = [];
+  for (let client in clients) {
+    let clone = template.cloneNode(true);
+    clone.dataset.client = client;
+
+    let username = clients[client];
+    let name = clone.querySelector('span');
+    name.textContent = username;
+
+    if (username === USER_SETTINGS.username) {
+      clone.classList.add('current-user');
+
+      let options = clone.querySelector('.room-client-options');
+      options.classList.add('hidden');
+    }
+
+    client_arr.push(clone);
+  }
+
+  client_list.replaceChildren(...client_arr);
+
+}
 
 
 socket.on("connect", () => {
@@ -339,6 +372,8 @@ socket.on('room-update', (clients) => {
   // console.log(clientList)
 
   client_screen.replaceChildren(...clientList);
+
+  updateRoomClientsList(clients);
 
 })
 
