@@ -7,8 +7,8 @@ from flask_login import current_user
 from random_username.generate import generate_username
 
 from .classes import Client, ClientStatus, RoomStatus
+
 from .. import socket
-from ..models import Game
 
 
 @socket.on('connect')

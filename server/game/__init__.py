@@ -1,1 +1,1 @@
-from . import events
+from .main import game

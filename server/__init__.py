@@ -48,7 +48,8 @@ def create_app():
     app.register_blueprint(auth_bp)
     
     # Add socketIO events
-    from . import game
+    from .game import game
+    app.register_blueprint(game)
 
     return app
 

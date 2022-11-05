@@ -6,9 +6,9 @@ main = Blueprint("main", __name__, static_folder='static')
 def home():
     return redirect(url_for('main.game'))
 
-@main.route("/game")
-def game():
-    return render_template('game.jinja')
+# @main.route("/game")
+# def game():
+#     return render_template('game.jinja')
 
 @main.route("/humans.txt")
 def humans():
