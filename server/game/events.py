@@ -1,21 +1,19 @@
 import os
 
 from flask import request, session
-from flask_socketio import emit
 from flask_login import current_user
-
+from flask_socketio import emit
 from random_username.generate import generate_username
 
-from .classes import Client, ClientStatus, RoomStatus
-from .. import socket
-from ..models import Game
+from server import socket
+from server.game.classes import Client, ClientStatus, RoomStatus
 
 
 @socket.on('connect')
 def setupClient():
     
     username = None
-    id=None
+    id = None
     
     if current_user.is_authenticated:
         username = current_user.username
@@ -47,14 +45,12 @@ def disconnect():
 
 @socket.on('username-change')
 def usernameChange(name):
-    
     user = session.get('user')
     
     user.username = name
     
 @socket.on('room-change')
 def roomChange(number):
-    
     user = session.get('user')
     
     user.changeRoom(number)
@@ -68,7 +64,6 @@ def ping():
 
 @socket.on('game-ready')
 def gameReady():
-    
     user = session.get("user")
     user.status = ClientStatus.WAITING
     

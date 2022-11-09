@@ -1,9 +1,11 @@
-from flask_socketio import emit, leave_room, join_room
-
 from enum import Enum
 from random import randint
+from typing import List
 
-from .types import TimeGame
+from flask_socketio import emit, join_room, leave_room
+
+from server.game.types import TimeGame
+
 
 class RoomStatus(Enum):   
     OPEN = 0
@@ -21,7 +23,7 @@ class ClientStatus(Enum):
   
 class Client():
       
-    def __init__(self, id:str=None, sid:str=None, username:str=None, addr:str=None):
+    def __init__(self, id:str=None, sid:str=None, username:str=None, addr:str=None) -> None:
         """Create a storage class for a client's data.
 
         Args:
@@ -42,7 +44,7 @@ class Client():
         
         self.room.addUser(self)
         
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.username} connected at {self.addr} in room {self.room.number}"
     
     def __repr__(self) -> str:
@@ -62,7 +64,7 @@ class Client():
         return self._username
     
     @username.setter
-    def username(self, new_name):
+    def username(self, new_name: str) -> None:
         
         self._username = new_name
         
@@ -73,7 +75,7 @@ class Client():
         self.room.roomUpdate()
        
        
-    def update(self):
+    def update(self) -> None:
         """Update the client when changes are made
         """
         
@@ -84,7 +86,7 @@ class Client():
         
         emit('client-settings', msg)
     
-    def changeRoom(self, room):
+    def changeRoom(self, room: int) -> None:
         
         self.room.removeUser(self)
         
@@ -107,7 +109,7 @@ class Client():
         
         print(f"{self.username} moved to room {self.room.number}")
     
-    def delete(self):
+    def delete(self) -> None:
         """Delete the User by removing all references to the object.
         """        
         self.room.removeUser(self)
@@ -117,7 +119,7 @@ class Room():
     NUM_MAP = {}
     DEFAULT_ROOM = 1000
     
-    def __init__(self, number: int=None):
+    def __init__(self, number: int=None) -> None:
         """Create a room in which the game can be played. Rooms are made up of a maximum of 4 players and
         automatically send updates to attached user. 
 
@@ -132,18 +134,18 @@ class Room():
         self.number = self.__generate_number(number)
         self.status = RoomStatus.OPEN
         
-        self.clients = []
+        self.clients: List[Client] = []
         
         Room.NUM_MAP[number] = self
         
         self.game = None
     
     
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.clients)
     
     
-    def __generate_number(self, num: int):
+    def __generate_number(self, num: int) -> int:
         
         while num in Room.NUM_MAP:
             num = randint(0, 1000)
@@ -151,7 +153,7 @@ class Room():
         return num
     
             
-    def addUser(self, user):
+    def addUser(self, user: Client) -> None:
         if self.status == RoomStatus.OPEN:
             
             if any(user==client for client in self.clients):
@@ -169,7 +171,7 @@ class Room():
         else:
             raise ValueError("Room is full")
         
-    def removeUser(self, user):
+    def removeUser(self, user: Client) -> None:
         
         self.clients.remove(user)
         
@@ -185,7 +187,7 @@ class Room():
 
         Room.lobbyUpdate()
 
-    def roomUpdate(self):
+    def roomUpdate(self) -> None:
         """Send room data to each client in the room.
         """
         
@@ -193,7 +195,7 @@ class Room():
         
         emit('room-update', msg, to=self.number)
     
-    def checkUsersStatus(self, status) -> bool:
+    def checkUsersStatus(self, status: ClientStatus) -> bool:
         """Checks if all users share the same status
 
         Args:
@@ -207,7 +209,7 @@ class Room():
         
         return check
       
-    def playGame(self):
+    def playGame(self) -> None:
         
         self.status = RoomStatus.ACTIVE
         
@@ -226,7 +228,7 @@ class Room():
         del self.game
         
     @staticmethod
-    def lobbyUpdate():
+    def lobbyUpdate() -> None:
         """Update the whole lobby about any room changes
         """
         msg = {number: len(room.clients) for number, room in Room.NUM_MAP.items()}
@@ -234,7 +236,7 @@ class Room():
         emit('lobby-update', msg, broadcast=True)
 
     @staticmethod
-    def getOpenRoom(client_id=None):
+    def getOpenRoom(client_id: str=None) -> 'Room':
         """ Return an open room for a user to join."""
         
         # Find if open rooms exist

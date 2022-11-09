@@ -2,15 +2,16 @@ import os
 from datetime import datetime
 from uuid import uuid4
 
+import classes  # Typing checks
 from flask_socketio import emit
 
-from .. import socket, db
-from ..models import Game, User
+from server import db, socket
+from server.models import Game, User
 
 
 class BaseGame():
     
-    def __init__(self, room, time=10, freq=30) -> None:
+    def __init__(self, room: classes.Room, time=10, freq=30) -> None:
         """Base storage class for games. Each game is attached to a room.
 
         Args:
@@ -31,7 +32,7 @@ class BaseGame():
         
 class TimeGame(BaseGame):
     
-    def __init__(self, room, time=10, freq=30) -> None:
+    def __init__(self, room: classes.Room, time=10, freq=30) -> None:
         """Time-based game. Button Mash for a specified duration of time and the winner is
         the one with the highest score at the end of the time period.
 
@@ -47,7 +48,7 @@ class TimeGame(BaseGame):
         
         self._cur_score = None
         
-    def start_game(self):
+    def start_game(self) -> None:
         self.startTime = datetime.now()
         self._cur_score = [0 for i in self.room.clients]
         
@@ -60,7 +61,7 @@ class TimeGame(BaseGame):
         emit("start-game", msg, to=self.room.number)
         self.game_loop()
     
-    def game_loop(self):
+    def game_loop(self) -> None:
         
         for i in range(self.totalTicks):
             
@@ -82,7 +83,7 @@ class TimeGame(BaseGame):
             
             socket.sleep(self.tickTime)
             
-    def end_game(self):
+    def end_game(self) -> None:
         
         emit("game-end", to=self.room.number)
         
@@ -116,7 +117,7 @@ class TimeGame(BaseGame):
         db.session.add(game)
         db.session.commit()
         
-    def update_score(self, client, score):
+    def update_score(self, client: classes.Client, score: int) -> None:
         
         index = self.room.clients.index(client)
         self._cur_score[index] = score
