@@ -622,9 +622,29 @@ footer {
 
 
 /* Dialog */
+.modal-outer {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.modal-outer[open] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
 .lobby-dialog {
     height: 500px;
     width: 500px;
+
+    border: 5px $dropdown_item_border solid;
+    border-radius: 20px;
+    background-color: #272727;
+    color: var(--primary-font-color);
 }
 
 .dialog-container {
@@ -768,3 +788,4 @@ $dropdown_item_border: rgba(black, 0.8);
     }
 
 }
+

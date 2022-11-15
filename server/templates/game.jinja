@@ -138,6 +138,39 @@
 {% endblock  %}
 
 {% block modal %}
+<dialog class="modal-outer" id="lobbyModal">
+
+    <div class="lobby-dialog">
+    
+        <div class="dialog-container flex-col">
+
+        <h2>Lobby List</h2>
+
+        <div class="lobby-div grid" id="lobbyGrid">
+        </div>
+
+        <template id="roomTemplate">
+            <div class="lobby-row flex-row">
+            
+                <h4></h4>
+                <div class="circle"></div>
+
+            </div>
+        </template>
+
+        <div class="lobby-options">
+
+            <button class="lobby-btn btn">Join Lobby</button>
+
+        </div>
+
+    </div>
+    
+    </div>
+
+</dialog>
+
+<!--
 <dialog class="lobby-dialog" id="lobbyModal">
 
     <div class="dialog-container flex-col">
@@ -168,12 +201,23 @@
 
 </dialog>
 
+-->
 <script>
 
     let dialogEl = document.getElementById('lobbyModal');
+    let dialogBox = dialogEl.querySelector(".lobby-dialog");
 
     dialogEl.addEventListener("mousedown", (e) => {
-        if (e.target === dialogEl) {
+        const inDialog = dialogBox.contains(e.target);
+
+        if (!inDialog) {
+            document.body.classList.remove('blur');
+            dialogEl.close();
+        }
+    })
+
+    dialogEl.addEventListener("keydown", (e) => {
+        if (e.key === 'Escape') {
             document.body.classList.remove('blur');
             dialogEl.close();
         }
