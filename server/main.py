@@ -4,7 +4,7 @@ main = Blueprint("main", __name__, static_folder='static')
 
 @main.route("/")
 def home():
-    return redirect(url_for('main.game'))
+    return redirect(url_for('game.game'))
 
 # @main.route("/game")
 # def game():

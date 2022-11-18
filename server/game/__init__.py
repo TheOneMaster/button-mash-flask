@@ -1,1 +1,1 @@
-from .main import game
+from .main import game_blueprint
