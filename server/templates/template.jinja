@@ -24,7 +24,7 @@
 <body>
     <div class="topbar flex-row">
         <a href="{{ url_for('main.home') }}" class="link-main link-top link">Button Mash</a>
-        <!-- <a href="{{ url_for('game.game_route') }}" class="link-top link">Game</a> -->
+        <!-- <a href="{{ url_for('game.game') }}" class="link-top link">Game</a> -->
         <div class="profile flex-row">
             {% if current_user.is_authenticated %}
                 <img src="{{ current_user.picture }}" id="profileImage">
@@ -106,6 +106,8 @@
     {% block modal %}
     {% endblock %}
 
-    <script src="{{ url_for('static', filename='client-JS/template.js') }}"></script>
+    {% assets "template" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 </body>
 </html>

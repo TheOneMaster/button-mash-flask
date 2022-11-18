@@ -3,3 +3,7 @@
 /.vscode
 *__pycache__
 .env
+
+# Webassets
+/server/static/.webassets-cache
+/server/static/gen
