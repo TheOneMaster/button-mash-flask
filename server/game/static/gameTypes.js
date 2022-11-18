@@ -4,10 +4,10 @@ class Game {
      * @param  {Number} maxTime Maximum amount of time the game can last for in seconds
      * @param  {Number} freq Update frequency of the game to the server
      */
-    constructor(maxTime, freq, mashKey) {
+    constructor(settings, maxTime, freq) {
         this.maxTime = maxTime;
         this.freq = freq;
-        this.mashKey = mashKey;
+        this.settings = settings;
         this.start_time = null;
     }
 
@@ -28,13 +28,14 @@ class TimeGame extends Game {
     #animationLoop;
     #current_score;
 
-    constructor(mashKey, maxTime=10, freq=30) {
-        super(maxTime=maxTime, freq=freq);
+    constructor(settings, maxTime=10, freq=30) {
+        super(settings=settings, maxTime=maxTime, freq=freq);
 
-        this.score = 0
-        this.totalPresses = 0
-        this.tick = 0
+        this.score = 0;
+        this.totalPresses = 0;
+        this.tick = 0;
 
+        this.start_time = null;
         this.current_time = null;
 
         this.#updateCycle = null;
@@ -50,6 +51,7 @@ class TimeGame extends Game {
         document.body.addEventListener("keydown", this.#keypress);
         
         this.mashKey = settings.mashKey;
+        this.start_time = Date.now()
 
         this.#updateCycle = setInterval(() => this.tickLoop(), 1000/this.freq);  // Update frequency of the game
         this.#animationLoop = requestAnimationFrame(() => this.gameLoop());        // Draw the score at 60 FPS
@@ -126,7 +128,6 @@ class TimeGame extends Game {
 
         this.start_time = null;
         this.current_time = null;
-
         this.gameCycle = null;
     }
 
