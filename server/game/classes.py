@@ -2,6 +2,7 @@ from flask_socketio import emit, leave_room, join_room
 
 from enum import Enum
 from random import randint
+import datetime
 
 from .types import TimeGame
 
@@ -42,8 +43,10 @@ class Client():
         
         self.room.addUser(self)
         
+        self._log_('Connected')
+        
     def __str__(self):
-        return f"{self.username} connected at {self.addr} in room {self.room.number}"
+        return f"Client {self.username} connected at {self.room.number} from {self.addr}"
     
     def __repr__(self) -> str:
         return f"Client(id={self.id}, username=${self.username}, address={self.addr})"
@@ -55,6 +58,15 @@ class Client():
                 return __o.id == self.id
             
         return False
+    
+    def _log_(self, type):
+        
+        current_time = datetime.datetime.now(datetime.timezone.utc).astimezone()
+        current_time = current_time.replace(microsecond=0)
+        current_time = current_time.strftime("%Y-%m-%d %H:%M:%S %z")
+        
+        log_msg = f"[{current_time}] [{self.addr}] {type} [{self.room.number}]: {self.username}"
+        print(log_msg)
     
     
     @property
@@ -101,16 +113,14 @@ class Client():
             print(f"{self.username} moved to room {self.room.number}")
             
         except ValueError as error:
-            emit(error.message)
-                
-        
-        
-        
+            emit(error.message)   
     
     def delete(self):
         """Delete the User by removing all references to the object.
         """        
         self.room.removeUser(self)
+        
+        self._log_('Disconnected')
 
 class Room():
     

@@ -29,8 +29,6 @@ def setupClient():
     user = Client(id, sid, username, addr)   
     session['user'] = user
     
-    print(user)
-    
 @socket.on('disconnect')
 def disconnect():
     
@@ -41,8 +39,6 @@ def disconnect():
     user.delete()
     
     session.pop('user')
-    
-    print(f"Disconnected: {username} from {addr}")
 
 
 @socket.on('username-change')
