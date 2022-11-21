@@ -1,13 +1,109 @@
-// JS for the HTML
 "use strict"
 
+class UserSettings {
+  /**
+   * Storage class for user settings
+   * @param  {Socket} socket SocketIO Client Object
+   * @param  {String} username Client username
+   * @param  {Number} lobby Client room number
+   * @param  {String} mashKey String representation of keyboard key to mash
+   */
+  constructor(socket, username = null, lobby = null, mashKey = "Space") {
+    this.socket = socket;
+    this.username = username;
+    this.room = lobby;
+    this.mashKey = mashKey;
+  }
+
+  // Set client properties when first connecting to Server
+  setUsername(new_name) {
+    this._username = new_name
+  }
+
+  setRoom(new_room) {
+    this._room = new_room;
+  }
+
+  // Manipulate Client properties from browser
+  get username() {
+    return this._username;
+  }
+
+  set username(new_name) {
+    if (new_name !== null && new_name !== this.username) {
+      this.socket.emit('username-change', new_name);
+      this._username = new_name;
+    }
+  }
+
+  get room() {
+    return this._room;
+  }
+
+  set room(new_room) {
+    if (new_room !== null && new_room !== this.room) {
+      socket.emit('room-change', new_room);
+      this._room = new_room;
+    }
+  }
+
+
+}
+
+class Ping {
+  constructor() {
+    this.pings = []
+    this.pingTime = null;
+  }
+
+  getPing() {
+    let ping_sum = this.pings.reduce((a, b) => a + b, 0);
+    let ping_length = this.pings.length;
+
+    return Math.floor(ping_sum / ping_length);
+  }
+
+  sendPing = () => {
+    this.pingTime = new Date().getTime();
+    socket.volatile.emit('latency-ping');
+  }
+
+  /**
+   * Add a ping value to the list of ping values
+   * @param {Number} ping latency value from the most recent ping
+   */
+  addPing(ping) {
+    
+    this.pings.push(ping);
+
+    if (this.pings.length > 5) {
+      this.pings = this.pings.slice(1, this.pings.length);
+    }
+  }
+
+  updatePing() {
+    let pingEl = document.getElementById('pingOutput');
+    pingEl.textContent = `${this.getPing()} ms`;
+  }
+
+  disconnected() {
+    let pingEl = document.getElementById('pingOutput');
+    pingEl.textContent = 'disconnected';
+  }
+}
+
 const eventHandlers = {
+  // Global event handlers for the DOM are stored here
+
   settingsToggle: function () {
+    // Toggle settings menu visibility
     let settings = document.getElementById("gameSettings");
     settings.classList.toggle("hidden");
   },
 
   activeLobby: function () {
+    // Set currently clicked lobby as "active"
+
     let lobby = document.getElementById('lobbyGrid');
     let rooms = lobby.childNodes;
 
@@ -22,63 +118,196 @@ const eventHandlers = {
 
     this.classList.add(active)
   },
+
+  editUsername: function () {
+
+    // Get current username
+    let usernameEl = document.getElementById("username");
+    let username = USER_SETTINGS.username;
+
+    // Replace span with input
+    let inputEl = document.createElement("input");
+    inputEl.id = "usernameInput";
+    inputEl.value = username;                       // Add current username to the input element text
+
+    usernameEl.replaceWith(inputEl);
+
+    inputEl.addEventListener("keypress", (e) => {
+      if (e.key === 'Enter') {
+        eventHandlers.saveUsername();
+      }
+    })
+
+    inputEl.focus()
+
+    let editUserEl = document.getElementById('editUsername');
+    editUserEl.removeEventListener("click", eventHandlers.editUsername);
+    editUserEl.addEventListener("click", eventHandlers.saveUsername);
+  },
+
+  saveUsername: function () {
+
+    let inputEl = document.getElementById("usernameInput");
+    let newUsername = inputEl.value.trim()
+
+    let newUsernameEl = document.createElement("span");
+    newUsernameEl.id = "username";
+
+    newUsernameEl.textContent = newUsername;
+    inputEl.replaceWith(newUsernameEl);
+
+    // Set new username
+    USER_SETTINGS.username(newUsername);
+
+    let editUserEl = document.getElementById('editUsername');
+    editUserEl.removeEventListener("click", eventHandlers.saveUsername);
+    editUserEl.addEventListener("click", eventHandlers.editUsername);
+  },
+
+  editRoom: function () {
+    let roomEl = document.getElementById("room");
+    let roomNum = Number(roomEl.textContent);
+
+    let roomInput = document.createElement("input");
+    roomInput.id = "roomInput";
+    roomInput.value = roomNum;
+
+    roomEl.replaceWith(roomInput);
+
+    roomInput.addEventListener("keypress", (e) => {
+      if (e.key === 'Enter') {
+        eventHandlers.saveRoom();
+      }
+    })
+
+    roomInput.focus();
+
+    let editRoomEl = document.getElementById("editRoom");
+    editRoomEl.removeEventListener("click", eventHandlers.editRoom);
+    editRoomEl.addEventListener("click", eventHandlers.saveRoom);
+
+  },
+
+  saveRoom: function () {
+    let inputEl = document.getElementById("roomInput");
+    let newRoom = inputEl.value.trim();
+
+    let newRoomEl = document.createElement("span");
+    newRoomEl.id = "room";
+
+    newRoomEl.textContent = newRoom;
+    inputEl.replaceWith(newRoomEl);
+
+    newRoom = Number(newRoom)
+    USER_SETTINGS.room = newRoom;
+
+    let editRoomEl = document.getElementById('editRoom');
+    editRoomEl.removeEventListener("click", eventHandlers.saveRoom);
+    editRoomEl.addEventListener("click", eventHandlers.editRoom);
+  },
+
+  editMashKey: function () {
+    let mashKeyEl = document.getElementById('mashKey');
+    let editMashKeyEl = document.getElementById('editMashKey');
+
+    let inputMashKey = document.createElement('input');
+    inputMashKey.id = "mashKeyInput";
+
+    mashKeyEl.replaceWith(inputMashKey);
+
+    inputMashKey.focus();
+
+    function saveMashKey(e) {
+      let key = e.code;
+      USER_SETTINGS.mashKey = key;
+
+      let newMashKeyEl = document.createElement("span");
+      newMashKeyEl.id = "mashKey";
+      newMashKeyEl.textContent = key;
+
+      inputMashKey.replaceWith(newMashKeyEl);
+
+      editMashKeyEl.addEventListener("click", eventHandlers.editMashKey)
+
+    }
+
+    inputMashKey.addEventListener("keypress", saveMashKey)
+
+    editMashKeyEl.removeEventListener("click", eventHandlers.editMashKey);
+
+  }
 };
 
 function addEventHandlers() {
 
+  // Add event handlers to the DOM on initial page load
+
   // Settings wheel click listener
   let settings_gear = document.getElementById("settingsGear");
   settings_gear.addEventListener("click", eventHandlers.settingsToggle);
+
+  // Edit & Save username
+  let options = ['editUsername', 'editRoom', 'editMashKey'];
+
+  for (let option of options) {
+    let editEl = document.getElementById(option);
+
+    if (editEl !== null) {
+      editEl.addEventListener("click", eventHandlers[option]);
+    }
+  }
+
+  document.getElementById("mashKey").textContent = USER_SETTINGS.mashKey;
+
+}
+
+function showLobby() {
+  let lobby = document.getElementById('lobbyModal');
+  document.body.classList.add('blur')
+  lobby.showModal()
 }
 
 // Socket IO stuff
 
 const socket = io();
-
-function changeRoom() {
-  let room_entry = document.getElementById("roomId");
-  let curRoom = document.getElementById("roomId-str");
-
-  curRoom = curRoom.textContent.slice(17);
-  let room = room_entry.value;
-
-  if (room && room !== curRoom) {
-    socket.emit("room-change", Number(room));
-    room_entry.value = "";
-  }
-}
-
-function changeUsername() {
-  let userString = document.getElementById("username-str");
-  let username = userString.dataset.str;
-
-  let usernameInp = document.getElementById("usernameInp");
-  let inpString = usernameInp.value;
-
-  if (inpString && username !== inpString) {
-    socket.emit("username-change", inpString);
-    usernameInp.value = "";
-  }
-}
+const USER_SETTINGS = new UserSettings(socket);
+const PING = new Ping()
 
 function startGame() {
   socket.emit('game-ready');
 }
 
-let ping = undefined;
-let ping_start = undefined;
-let ping_loop = undefined;
-let pingEl = undefined;
+function updateRoomClientsList(clients) {
 
-function sendPing() {
-  ping_start = new Date().getTime();
-  socket.volatile.emit('latency-ping');
+  let template = document.getElementById('room-client-template').content.firstElementChild;
+  let client_list = document.getElementById('room-client-list');
+
+  let client_arr = [];
+  for (let client in clients) {
+    let clone = template.cloneNode(true);
+    clone.dataset.client = client;
+
+    let username = clients[client];
+    let name = clone.querySelector('span');
+    name.textContent = username;
+
+    if (username === USER_SETTINGS.username) {
+      clone.classList.add('current-user');
+
+      let options = clone.querySelector('.room-client-options');
+      options.classList.add('hidden');
+    }
+
+    client_arr.push(clone);
+  }
+
+  client_list.replaceChildren(...client_arr);
+
 }
 
 
 socket.on("connect", () => {
-  ping_loop = setInterval(sendPing, 3000);
-  sendPing();
+  setInterval(PING.sendPing, 3000);
 });
 
 socket.on("disconnect", () => {
@@ -88,20 +317,17 @@ socket.on("disconnect", () => {
     game.gameEnd();
   }
 
-  pingEl.textContent = "disconnected";
-
+  PING.disconnected();
 })
 
 socket.on('latency-pong', () => {
   let current_time = new Date().getTime();
+  let ping_start = PING.pingTime;
 
-  ping = (current_time - ping_start) / 2;
+  let cur_ping = (current_time - ping_start) / 2;
 
-  if (pingEl === undefined) {
-    pingEl = document.getElementById('pingOutput');
-  }
-
-  pingEl.textContent = ping;
+  PING.addPing(cur_ping);
+  PING.updatePing();
 })
 
 
@@ -113,23 +339,14 @@ socket.on("client-settings", (json) => {
   let username = json.username;
   let room = json.room;
 
-  let curUserEl = document.getElementById("username-str");
-  let curUser = curUserEl.dataset.str;
+  USER_SETTINGS.setUsername(username)
+  USER_SETTINGS.setRoom(room);
 
-  if (!curUser || curUser !== username) {
-    curUserEl.dataset.str = username;
-    curUserEl.textContent = `Username: ${username}`;
-  }
+  let usernameEl = document.getElementById("username");
+  usernameEl.textContent = username;
 
-  let curRoomEl = document.getElementById("roomId-str");
-  let curRoom = curRoomEl.dataset.room;
-
-  if (!curRoom || curRoom !== room) {
-    curRoomEl.dataset.room = room;
-    curRoomEl.textContent = `Current room ID: ${room}`;
-  }
-
-  // console.log("Updated settings");
+  let roomEl = document.getElementById('room');
+  roomEl.textContent = room;
 });
 
 socket.on('room-update', (clients) => {
@@ -137,8 +354,7 @@ socket.on('room-update', (clients) => {
   let template = document.getElementById('clientMain').content.firstElementChild;
   let client_screen = document.getElementById('lobbyMain');
 
-  let curUserEl = document.getElementById('username-str');
-  let curUser = curUserEl.dataset.str;
+  let curUser = USER_SETTINGS.username;
 
   let clientList = []
   for (let client in clients) {
@@ -163,6 +379,8 @@ socket.on('room-update', (clients) => {
 
   client_screen.replaceChildren(...clientList);
 
+  updateRoomClientsList(clients);
+
 })
 
 socket.on("lobby-update", (rooms) => {
@@ -178,6 +396,8 @@ socket.on("lobby-update", (rooms) => {
     let clone = template.cloneNode(true);
     let button = clone.querySelector("h4");
     let circle = clone.querySelector(".circle");
+
+    if (parseInt(room) === USER_SETTINGS.room) clone.classList.add("active-lobby");
 
     clone.dataset.num = room;
     button.textContent = room;
@@ -248,7 +468,7 @@ socket.on("game-score", (score) => {
       score_bar.classList.remove('score-winner');
     }
 
-    let cur_height_ratio = (cur_score/20);    // Goddamn, imagine having more than 20 cps
+    let cur_height_ratio = (cur_score / 20);    // Goddamn, imagine having more than 20 cps
     let cur_height = cur_height_ratio * 600
 
     if (cur_height_ratio >= 1) {
@@ -305,6 +525,8 @@ const game = {
   initGame: function () {
     game.setCallbacks();
 
+    game.mash_key = USER_SETTINGS.mashKey;
+
     game.start_time = new Date().getTime();
 
     game.gameInterval = setInterval(game.gameLoop, 1000 / game.freq);
@@ -339,8 +561,10 @@ const game = {
   },
 
   __keypress__: function (e) {
-    if (game.mash_key == e.key) {
+    if (game.mash_key == e.code) {
       game.totalPress += 1;
     }
   },
 };
+
+addEventHandlers();

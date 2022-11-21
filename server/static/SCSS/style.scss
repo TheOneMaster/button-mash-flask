@@ -20,6 +20,10 @@ $score_bar_damn_col: darkorange;
     --background-color: rgb(18, 18, 18);
     --primary-font-color: rgba(255, 255, 255, 0.87);
     --second-font-color: rgba(255, 255, 255, 0.6);
+
+
+    --current-user-color: #{rgba($current_user, 0.8)};
+
 }
 
 body {
@@ -72,6 +76,10 @@ body {
 
 .is-danger {
     background-color: $danger;
+}
+
+.blur {
+    filter: blur(5px);
 }
 
 /* Top Bar */
@@ -326,6 +334,136 @@ footer {
     height: 100%;
 }
 
+.left-bar {
+    min-width: 250px;
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid black;
+    
+    @include elevation(1);
+
+    .user-settings {
+        
+        align-items: center;
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        h2 {
+            text-decoration: underline;
+        }
+    }
+
+    .user-settings-item {
+        color: var(--primary-font-color);
+        font-weight: bold;
+        margin-bottom: 15px;
+
+        &:last-child {
+            margin-left: auto;
+        }
+
+        span{
+            color: var(--second-font-color);
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            margin-left: 10px;
+        }
+
+        svg {
+            fill: white;
+            height: 20px;
+            width: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        &>div{
+            margin-left: auto;
+        }
+    }
+
+    #username {
+        color: var(--current-user-color);
+    }
+
+    #roomInput, #mashKeyInput {
+        width: 5ch;
+    }
+
+
+    .user-room {
+
+        align-items: center;
+
+        h2 {
+            text-decoration: underline;
+        }
+
+        ul {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    .room-client {
+        border-radius: 10px;
+        border: 1px solid black;
+        overflow: hidden;
+        align-items: center;
+        padding-left: 10px;
+        margin-bottom: 20px;
+
+        .circle {
+            margin-right: 10px;
+            height: 10px;
+            width: 10px;
+        }
+
+        .room-client-options {
+            margin-left: auto;
+            border-left: 1px solid black;
+
+            button {
+                border:none;
+                border-bottom: 1px solid black;
+                color: var(--second-font-color);
+                padding: 10px;
+                cursor: pointer;
+                @include elevation(5);
+            }
+
+            button:last-child {
+                border-bottom: 0px;
+            }
+
+
+        }
+
+        &.current-user {
+            order: -1;
+        }
+
+    }
+
+    .lobby-button {
+        border: none;
+        border-radius: 10px;
+        background-color: var(--theme-color);
+        color: white;
+        padding: 10px;
+    }
+
+}
+
 .game-main {
     flex-grow: 1;
     margin-left: 20px;
@@ -339,7 +477,7 @@ footer {
 }
 
 .current-user {
-    color: rgba($current_user, 0.8);
+    color: var(--current-user-color);
 }
 
 .lobby-screen {
@@ -362,9 +500,10 @@ footer {
     display: flex;
     align-items: end;
     justify-content: center;
+    color: white;
 
     .score-damn {
-        color: $score_bar_damn_col;
+        background-color: $score_bar_damn_col;
     }
 
     &.score-winner {
@@ -410,7 +549,6 @@ footer {
     #game-start {
         border-radius: 50%;
         height: 150px;
-        width: 150px;
         border: none;
         background-color: skyblue;
         cursor: pointer;
@@ -484,9 +622,29 @@ footer {
 
 
 /* Dialog */
+.modal-outer {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.modal-outer[open] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
 .lobby-dialog {
     height: 500px;
     width: 500px;
+
+    border: 5px $dropdown_item_border solid;
+    border-radius: 20px;
+    background-color: #272727;
+    color: var(--primary-font-color);
 }
 
 .dialog-container {
@@ -515,6 +673,15 @@ footer {
     border: 1px solid black;
     border-radius: 10px;
     margin: 0 10px;
+
+    &:not(.active-lobby):hover {
+        box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
+    }
+
+    &.active-lobby {
+        border-color:  rgba(97, 169, 224, 1);
+        border-width: 2px;
+    }
 }
 
 
@@ -532,10 +699,6 @@ footer {
     background-color: greenyellow;
 }
 
-.lobby-row:hover {
-    box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
-}
-
 
 $dropdown_color: white;
 $dropdown_item_border: rgba(black, 0.8);
@@ -548,6 +711,8 @@ $dropdown_item_border: rgba(black, 0.8);
     
         --primary-font-color: black;
         --second-font-color: rgb(32, 32, 32);
+
+        --current-user-color: #{$current_user};
     }
 
     .topbar {
@@ -571,8 +736,17 @@ $dropdown_item_border: rgba(black, 0.8);
         background-color: initial;
     }
 
+    .user-settings {
+
+        .user-settings-item {
+            svg {
+                fill: black;
+            }
+        }
+    }
+
     .current-user {
-        color: $current_user;
+        color: var(--current-user-color);
     }
 
     .ping-div span {
@@ -589,7 +763,7 @@ $dropdown_item_border: rgba(black, 0.8);
         }
 
         &.is-danger {
-            background-color: #FF385F;
+            background-color: $danger;
             color: white;
         }
         
@@ -618,4 +792,11 @@ $dropdown_item_border: rgba(black, 0.8);
         }
     }
 
+    .lobby-dialog {
+        background-color: var(--background-color);
+        border-color: black;
+
+    }
+
 }
+
