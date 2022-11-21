@@ -134,7 +134,7 @@ class Room():
         
         self.clients = []
         
-        Room.NUM_MAP[number] = self
+        Room.NUM_MAP[self.number] = self
         
         self.game = None
     
