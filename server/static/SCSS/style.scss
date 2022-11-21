@@ -673,6 +673,15 @@ footer {
     border: 1px solid black;
     border-radius: 10px;
     margin: 0 10px;
+
+    &:not(.active-lobby):hover {
+        box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
+    }
+
+    &.active-lobby {
+        border-color:  rgba(97, 169, 224, 1);
+        border-width: 2px;
+    }
 }
 
 
@@ -688,10 +697,6 @@ footer {
 
 .open-lobby {
     background-color: greenyellow;
-}
-
-.lobby-row:hover {
-    box-shadow: 0px 0px 5px 4px rgba(97,169,224,1);
 }
 
 
@@ -785,6 +790,12 @@ $dropdown_item_border: rgba(black, 0.8);
                 fill: black;
             }
         }
+    }
+
+    .lobby-dialog {
+        background-color: var(--background-color);
+        border-color: black;
+
     }
 
 }

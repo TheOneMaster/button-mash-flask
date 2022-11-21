@@ -397,6 +397,8 @@ socket.on("lobby-update", (rooms) => {
     let button = clone.querySelector("h4");
     let circle = clone.querySelector(".circle");
 
+    if (parseInt(room) === USER_SETTINGS.room) clone.classList.add("active-lobby");
+
     clone.dataset.num = room;
     button.textContent = room;
 

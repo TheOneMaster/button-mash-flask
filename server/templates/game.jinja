@@ -160,7 +160,7 @@
 
         <div class="lobby-options">
 
-            <button class="lobby-btn btn">Join Lobby</button>
+            <button class="lobby-btn btn" id="LobbyJoin">Join Lobby</button>
 
         </div>
 
@@ -170,57 +170,40 @@
 
 </dialog>
 
-<!--
-<dialog class="lobby-dialog" id="lobbyModal">
-
-    <div class="dialog-container flex-col">
-
-        <h2>Lobby List</h2>
-
-        <div class="lobby-div grid" id="lobbyGrid">
-        </div>
-
-        <template id="roomTemplate">
-            <div class="lobby-row flex-row">
-            
-                <h4></h4>
-                <div class="circle"></div>
-
-            </div>
-        </template>
-
-        <div class="lobby-options">
-
-            <button class="lobby-btn btn">Join Lobby</button>
-
-        </div>
-
-    </div>
-    
-    
-
-</dialog>
-
--->
 <script>
 
-    let dialogEl = document.getElementById('lobbyModal');
-    let dialogBox = dialogEl.querySelector(".lobby-dialog");
+    const dialogEl = document.getElementById('lobbyModal');
+    const dialogBox = dialogEl.querySelector(".lobby-dialog");
+    const lobbyJoinEl = document.getElementById('LobbyJoin');
 
+    function closeModal() {
+        document.body.classList.remove('blur');
+        dialogEl.close();
+    }
+
+    // Close if mouse-click outside modal
     dialogEl.addEventListener("mousedown", (e) => {
         const inDialog = dialogBox.contains(e.target);
 
         if (!inDialog) {
-            document.body.classList.remove('blur');
-            dialogEl.close();
+            closeModal()
         }
     })
 
+    // Close on escape key
     dialogEl.addEventListener("keydown", (e) => {
         if (e.key === 'Escape') {
-            document.body.classList.remove('blur');
-            dialogEl.close();
+            closeModal()
         }
+    })
+
+    // Select lobby and close modal
+    lobbyJoinEl.addEventListener("click", (e) => {
+        const selected_room = dialogBox.querySelector(".active-lobby");
+        const selected_room_num = parseInt(selected_room.dataset.num);
+
+        USER_SETTINGS.room = selected_room_num;
+        closeModal()
     })
 
 </script>

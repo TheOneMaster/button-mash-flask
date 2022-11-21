@@ -565,6 +565,13 @@ footer #link-twitter {
   border-radius: 10px;
   margin: 0 10px;
 }
+.lobby-row:not(.active-lobby):hover {
+  box-shadow: 0px 0px 5px 4px rgb(97, 169, 224);
+}
+.lobby-row.active-lobby {
+  border-color: rgb(97, 169, 224);
+  border-width: 2px;
+}
 
 .circle {
   width: 20px;
@@ -578,10 +585,6 @@ footer #link-twitter {
 
 .open-lobby {
   background-color: greenyellow;
-}
-
-.lobby-row:hover {
-  box-shadow: 0px 0px 5px 4px rgb(97, 169, 224);
 }
 
 @media screen and (prefers-color-scheme: light) {
@@ -643,6 +646,10 @@ footer #link-twitter {
   }
   .profile .profile-option svg {
     fill: black;
+  }
+  .lobby-dialog {
+    background-color: var(--background-color);
+    border-color: black;
   }
 }
 
