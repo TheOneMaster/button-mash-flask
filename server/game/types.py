@@ -19,10 +19,10 @@ class BaseGame():
             time (int, optional): Maximum time for the game in seconds. Defaults to 10.
             freq (int, optional): Frequency (tick rate) of the game. Defaults to 30.
         """
-        self.room = room
-        self.gameTime = time
-        self.freq = freq
-        self.tickTime = 1/freq
+        self.room      = room
+        self.gameTime  = time
+        self.freq      = freq
+        self.tickTime  = 1/freq
         self.startTime = None
         
     def __repr__(self) -> str:

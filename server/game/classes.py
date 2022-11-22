@@ -1,29 +1,29 @@
 from enum import Enum
 from random import randint
-from typing import List
+from typing import List, Optional
 
 from flask_socketio import emit, join_room, leave_room
 
 from server.game.types import TimeGame
 
 
-class RoomStatus(Enum):   
+class RoomStatus(Enum):
     OPEN = 0
     CLOSED = 1
     WAITING = 2
     ACTIVE = 3
     END = 4
 
-class ClientStatus(Enum): 
+
+class ClientStatus(Enum):
     READY = 0
     WAITING = 1
     ACTIVE = 2
 
 
-  
 class Client():
-      
-    def __init__(self, id:str=None, sid:str=None, username:str=None, addr:str=None) -> None:
+
+    def __init__(self, id: Optional[str] = None, sid: Optional[str] = None, username: Optional[str] = None, addr: Optional[str] = None) -> None:
         """Create a storage class for a client's data.
 
         Args:
@@ -31,95 +31,94 @@ class Client():
             username (str, optional): The username of the client. Defaults to None.
             addr (str, optional): The remote address of the client. Defaults to None.
         """
-        self.id = id
-        self.sid = sid
-        self.addr = addr
+        self.id        = id
+        self.sid       = sid
+        self.addr      = addr
         self._username = username
-        
+
         self.status = ClientStatus.READY
-        
+
         self.room = Room.getOpenRoom(id)
-        
+
         self.update()
-        
+
         self.room.addUser(self)
-        
+
     def __str__(self) -> str:
         return f"{self.username} connected at {self.addr} in room {self.room.number}"
-    
+
     def __repr__(self) -> str:
         return f"Client(id={self.id}, username=${self.username}, address={self.addr})"
-    
+
     def __eq__(self, __o: object) -> bool:
-        
+
         if isinstance(__o, Client):
             if __o.id is not None:
                 return __o.id == self.id
-            
+
         return False
-    
-    
+
     @property
     def username(self) -> str:
         return self._username
-    
+
     @username.setter
     def username(self, new_name: str) -> None:
-        
+
         self._username = new_name
-        
+
         # Update client settings
         self.update()
-        
+
         # Update room
         self.room.roomUpdate()
-       
-       
+
     def update(self) -> None:
         """Update the client when changes are made
         """
-        
+
         msg = {
             "username": self._username,
             "room": self.room.number
         }
-        
+
         emit('client-settings', msg)
-    
+
     def changeRoom(self, room: int) -> None:
-        
-        self.room.removeUser(self)
-        
-        new_room = Room.NUM_MAP.get(room, None)
-        
-        if new_room is None:
-            new_room = Room(room)
-        
-        else:
-            try: 
-                new_room.addUser(self)
-                
-            except ValueError as error:
-                emit(error.message)
-        
-        self.room = new_room
-        
-        self.update()
-        self.room.addUser(self)
-        
-        print(f"{self.username} moved to room {self.room.number}")
-    
-    def delete(self) -> None:
-        """Delete the User by removing all references to the object.
-        """        
+
         self.room.removeUser(self)
 
+        new_room = Room.NUM_MAP.get(room, None)
+
+        if new_room is None:
+            new_room = Room(room)
+
+        else:
+            try:
+                new_room.addUser(self)
+
+            except ValueError as error:
+                emit(error.message)
+
+        self.room = new_room
+
+        self.update()
+        self.room.addUser(self)
+
+        print(f"{self.username} moved to room {self.room.number}")
+
+    def delete(self) -> None:
+        """Delete the User by removing all references to the object.
+        """
+        self.room.removeUser(self)
+
+
 class Room():
-    
+
     NUM_MAP = {}
     DEFAULT_ROOM = 1000
-    
-    def __init__(self, number: int=None) -> None:
+
+    def __init__(self, number: Optional[int] = None) -> None:
         """Create a room in which the game can be played. Rooms are made up of a maximum of 4 players and
         automatically send updates to attached user. 
 
@@ -127,59 +126,56 @@ class Room():
             number (int, optional): The number for the room. If no number or None is passed, the default
             number of 1000 is tried. If the number is already in use, a random number between 0 and 1000 is used. Defaults to None.
         """
-        
+
         if number is None:
             number = Room.DEFAULT_ROOM
-        
+
         self.number = self.__generate_number(number)
         self.status = RoomStatus.OPEN
-        
+
         self.clients: List[Client] = []
-        
+
         Room.NUM_MAP[number] = self
-        
+
         self.game = None
-    
-    
+
     def __len__(self) -> int:
         return len(self.clients)
-    
-    
+
     def __generate_number(self, num: int) -> int:
-        
+
         while num in Room.NUM_MAP:
             num = randint(0, 1000)
-            
+
         return num
-    
-            
+
     def addUser(self, user: Client) -> None:
         if self.status == RoomStatus.OPEN:
-            
-            if any(user==client for client in self.clients):
+
+            if any(user == client for client in self.clients):
                 raise ValueError("User is already in room")
-            
+
             self.clients.append(user)
-            
+
             if len(self.clients) == 4:
                 self.status = RoomStatus.CLOSED
-                
+
             join_room(self.number)
             self.roomUpdate()
             Room.lobbyUpdate()
-            
+
         else:
             raise ValueError("Room is full")
-        
+
     def removeUser(self, user: Client) -> None:
-        
+
         self.clients.remove(user)
-        
+
         if self.status != RoomStatus.OPEN:
             self.status = RoomStatus.OPEN
-            
+
         leave_room(self.number)
-        
+
         if len(self.clients) == 0:
             Room.NUM_MAP.pop(self.number, None)
         else:
@@ -190,11 +186,11 @@ class Room():
     def roomUpdate(self) -> None:
         """Send room data to each client in the room.
         """
-        
+
         msg = {client.sid: client._username for client in self.clients}
-        
+
         emit('room-update', msg, to=self.number)
-    
+
     def checkUsersStatus(self, status: ClientStatus) -> bool:
         """Checks if all users share the same status
 
@@ -204,52 +200,53 @@ class Room():
         Returns:
             bool: The boolean value of the check
         """
-                
+
         check = all(client.status == status for client in self.clients)
-        
+
         return check
-      
+
     def playGame(self) -> None:
-        
+
         self.status = RoomStatus.ACTIVE
-        
+
         for client in self.clients:
             client.status = ClientStatus.ACTIVE
-            
+
         self.game = TimeGame(self, time=5)
         self.game.start_game()
-        
+
         self.status = RoomStatus.END
-        
+
         for client in self.clients:
             client.status = ClientStatus.READY
-            
+
         self.game.end_game()
         del self.game
-        
+
     @staticmethod
     def lobbyUpdate() -> None:
         """Update the whole lobby about any room changes
         """
-        msg = {number: len(room.clients) for number, room in Room.NUM_MAP.items()}
-        
+        msg = {number: len(room.clients)
+               for number, room in Room.NUM_MAP.items()}
+
         emit('lobby-update', msg, broadcast=True)
 
     @staticmethod
-    def getOpenRoom(client_id: str=None) -> 'Room':
+    def getOpenRoom(client_id: str = None) -> 'Room':
         """ Return an open room for a user to join."""
-        
+
         # Find if open rooms exist
         for room in Room.NUM_MAP.values():
             if room.status == RoomStatus.OPEN:
-    
-                # Check that client is not already in room                
+
+                # Check that client is not already in room
                 if client_id is not None and any(client_id == client.id for client in room.clients):
                     continue
-                
+
                 return room
-        
-        # Else create a new room  
+
+        # Else create a new room
         open_room = Room()
-        
-        return open_room            
+
+        return open_room
