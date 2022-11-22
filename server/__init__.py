@@ -1,15 +1,14 @@
 import os
 
 from dotenv import load_dotenv
+from datetime import date
 
-from flask import Flask
+from flask import Flask, url_for
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_socketio import SocketIO
 from flask_assets import Environment, Bundle
-
-from datetime import date
 
 from server.js_bundle import template_bundle, game_bundle
 
