@@ -1,44 +1,3 @@
-// class ClientCard extends HTMLElement {
-
-//     constructor() {
-//         super();
-
-//         this.attachShadow({mode:"open"});
-
-//         // Set default property values
-//         this.name = "";
-//         this.leader = false;
-
-//         // Attach CSS to the component
-//         this.style = document.createElement("link");
-//         this.style.setAttribute("rel", "stylesheet");
-//         this.style.setAttribute("href", "ClientCard.css");
-
-//         this.shadowRoot.appendChild(this.style);
-
-//         // Create template layout
-//         this.template = document.createElement("template");
-//         const innerDiv = document.createElement("div");
-
-//     }
-
-//     connectedCallback() {
-
-//     }
-
-//     render() {
-
-//     }
-
-//     attributeChangedCallback(attrName, oldVal, newVal) {
-
-//     }
-
-//     static get observedAttributes() {
-//         return ["name", "leader"]
-//     }
-// }
-
 class SettingsOption extends HTMLElement {
     constructor() {
         super();
@@ -58,9 +17,7 @@ class SettingsOption extends HTMLElement {
             color: var(--second-font-color);
             margin-left: 5px;
             font-weight: 400;
-        }
-        .user-settings-item > div {
-            margin-left: auto;
+            display: inline-block;
         }
         .user-settings-item svg {
             fill: white;
@@ -68,6 +25,15 @@ class SettingsOption extends HTMLElement {
             width: 20px;
             cursor: pointer;
             margin-left: 10px;
+        }
+        .user-settings-input {
+            margin-left: 10px;
+            font-size: 1rem;
+            max-width: 20ch;
+            min-width: 10ch;
+        }
+        .user-settings-item > div {
+            margin-left: auto;
         }
         
         @media screen and (prefers-color-scheme: light) {
@@ -99,7 +65,16 @@ class SettingsOption extends HTMLElement {
         this.template.appendChild(innerDiv);
     }
 
-    
+    get value() {
+        return this._value;
+    }
+
+    set value(newVal) {
+        this._value = newVal;
+
+        // Only re-render the element if not currently editing
+        if (!this.editing) this.render();
+    }
 
     get setting() {
         return this.getAttribute("setting");
@@ -109,21 +84,97 @@ class SettingsOption extends HTMLElement {
         this.setAttribute("setting", settingName);
     }
 
-    get value() {
-        return this.getAttribute("value");
+
+    get editing() {
+        return this.hasAttribute("editing");
     }
 
-    set value(newVal) {
-        this.setAttribute("value", newVal);
+    set editing(status) {
+
+        if (status) this.setAttribute("editing", status)
+        else this.removeAttribute("editing")
     }
 
 
+    toggleInput = () => {
+        
+        const currently_editing = this.editing;
+        const toggle_val = !currently_editing;
+
+        if (toggle_val) {
+            const valueEl = this.shadowRoot.querySelector("span");
+
+            const inputEl = document.createElement("input");
+            inputEl.value = this.value;
+            inputEl.classList.add("user-settings-input")
+
+            valueEl.replaceWith(inputEl);
+            inputEl.focus();
+
+            inputEl.addEventListener("keydown", (e) => {
+                
+                if (this.setting === 'mashKey') {
+                    this.value = e.code;
+
+                    const event = new CustomEvent("setting-update", {
+                        bubbles: true,
+                        cancelable: false,
+                        composed: true,
+                        detail: {
+                            setting: this.setting,
+                            value: this.value
+                        }
+                    });
+
+                    this.dispatchEvent(event);
+                    this.toggleInput();
+                } else {
+                    
+                    if (e.key === 'Enter') {
+                        this.value = inputEl.value.trim();
+
+                        const event = new CustomEvent("setting-update", {
+                            bubbles: true,
+                            composed: true,
+                            cancelable: false,
+                            detail: {
+                                setting: this.setting,
+                                value: this.value
+                            }
+                        });
+
+                        this.dispatchEvent(event);
+                        this.toggleInput();
+                    } else if (e.key == "Escape") {
+                        this.toggleInput();
+                    }
+
+                }
+
+            })
+
+
+        } else {
+            const inputEl = this.shadowRoot.querySelector("input");
+
+            const newValueEl = document.createElement("span");
+            newValueEl.textContent = this.value;
+
+            inputEl.replaceWith(newValueEl);
+        }
+
+        this.editing = !this.editing;
+    }
 
     connectedCallback() {
+        this._value = null;
         this.render();
     }
 
     attributeChangedCallback(attrName, oldVal, newVal) {
+        // No need to re-render when editing since that would overwrite the input element
+        if (attrName === 'editing') return 
+
         if (oldVal !== newVal) {
             this[attrName] = newVal;
             this.render();
@@ -140,14 +191,19 @@ class SettingsOption extends HTMLElement {
         innerDiv.insertAdjacentText('afterbegin', settingString);
         
         const valueSpan = innerDiv.querySelector("span");
+        this.valueEl = valueSpan;
         valueSpan.textContent = this.value;
+
+        const editDiv = innerDiv.querySelector("div");
+        this.editEl = editDiv;
+        editDiv.addEventListener("click", this.toggleInput);
 
         this.shadowRoot.replaceChildren(this.stylesheet, innerDiv);
 
     }
 
     static get observedAttributes() {
-        return ["setting", "value"]
+        return ["setting", "editing"]
     }
 }
 
