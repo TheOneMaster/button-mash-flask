@@ -4,44 +4,10 @@ class SettingsOption extends HTMLElement {
 
         this.attachShadow({mode: "open"});
 
-        this.stylesheet = document.createElement("style");
-        this.stylesheet.innerHTML = `
-        .user-settings-item {
-            color: var(--primary-font-color);
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: row;
-        }
-        .user-settings-item span {
-            color: var(--second-font-color);
-            margin-left: 5px;
-            font-weight: 400;
-            display: inline-block;
-        }
-        .user-settings-item svg {
-            fill: white;
-            height: 20px;
-            width: 20px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        .user-settings-input {
-            margin-left: 10px;
-            font-size: 1rem;
-            max-width: 20ch;
-            min-width: 10ch;
-        }
-        .user-settings-item > div {
-            margin-left: auto;
-        }
+        this.stylesheet = document.createElement("link");
+        this.stylesheet.setAttribute("rel", "stylesheet");
+        this.stylesheet.setAttribute("href", "./static/CSS/settingsOption.css");
         
-        @media screen and (prefers-color-scheme: light) {
-            .user-settings-item svg {
-                fill: black;
-            }
-        }
-        `;
 
         // Template
         this.template = document.createElement("template");
@@ -172,11 +138,11 @@ class SettingsOption extends HTMLElement {
     }
 
     attributeChangedCallback(attrName, oldVal, newVal) {
-        // No need to re-render when editing since that would overwrite the input element
-        if (attrName === 'editing') return 
+        // No need to re-render when editing since that would overwrite the input element 
 
         if (oldVal !== newVal) {
             this[attrName] = newVal;
+            if (attrName === 'editing') return;
             this.render();
         }
     }
@@ -208,4 +174,3 @@ class SettingsOption extends HTMLElement {
 }
 
 customElements.define("settings-option", SettingsOption);
-// customElements.define("client-card", ClientCard);
