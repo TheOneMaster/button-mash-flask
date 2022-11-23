@@ -25,7 +25,7 @@
 .user-settings-item .user-settings-input {
   margin-left: 10px;
   min-width: 10ch;
-  width: auto;
+  width: 100%;
 }
 
 @media screen and (prefers-color-scheme: light) {
