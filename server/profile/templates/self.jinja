@@ -1,0 +1,20 @@
+{% extends "template.jinja" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('profile.static', filename='CSS/profile.css') }}">
+{% endblock head %}
+
+{% block body %}
+<div class="profile-body flex-row">
+
+    <div class="profile-picture">
+        <img src="{{ current_user.picture }}" id="profilePicture">
+    </div>
+    <div class="profile-details">
+        <h2>{{ current_user.username }}</h2>
+    
+    </div>
+
+</div>
+
+
+{% endblock body %}
