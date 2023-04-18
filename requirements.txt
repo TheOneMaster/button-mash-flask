@@ -31,7 +31,7 @@ rcssmin==1.1.1
 simple-websocket==0.8.0
 six==1.16.0
 SQLAlchemy==1.4.40
-Werkzeug==2.2.2
+Werkzeug==2.2.3
 wsproto==1.1.0
 xxhash==3.0.0
 zipp==3.8.1
